@@ -159,7 +159,7 @@ const EditionFormElementTemplate = () => (
             </li>`
 );
 
-export default class EditionView {
+export default class FormEditionView {
   getTemplate() {
     return EditionFormElementTemplate;
   }

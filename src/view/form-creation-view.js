@@ -165,7 +165,7 @@ const creationFormElementTemplate = () => (
 </li>`
 );
 
-export default class CreationView {
+export default class FormCreationView {
   getTemplate() {
     return creationFormElementTemplate;
   }
