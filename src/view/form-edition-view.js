@@ -123,6 +123,7 @@ const EditionFormElementTemplate = (points) => {
 };
 
 export default class FormEditionView {
+  #element = null;
   constructor(point) {
     this.point = point;
   }
@@ -131,14 +132,14 @@ export default class FormEditionView {
     return EditionFormElementTemplate(this.point);
   }
 
-  getElement() {
+  get element() {
     if (!this.element) {
-      this.element = createElement(this.getTemplate());
+      this.#element = createElement(this.getTemplate());
     }
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

@@ -1,5 +1,5 @@
 import { createElement } from '../render.js';
-import { humanizeHour, humanizeStartDate, differenceHoursMinutes } from '../util.js';
+import { humanizeHour, humanizeStartDate, formatHoursMinutes, differenceMinutes } from '../util.js';
 import {
   destinations,
   offer,
@@ -23,9 +23,8 @@ const destinationElementTemplate = (points) => {
     </li>`).join('');
 
   const createDifferenceTimeFormat = () =>{
-    const differenceResult = differenceHoursMinutes(dateFrom,dateTo);
-    const splitDifference = (`${differenceResult.toFixed(2) }`).split('.');
-    const humanizeDifferenceFormat = splitDifference.join('H ');
+    const differenceResult = differenceMinutes(dateFrom,dateTo);
+    const humanizeDifferenceFormat = formatHoursMinutes(differenceResult);
 
     return humanizeDifferenceFormat;
   };
@@ -33,26 +32,26 @@ const destinationElementTemplate = (points) => {
   return `<ul class="trip-events__list">
             <li class="trip-events__item">
               <div class="event">
-                <time class="event__date" datetime="${dateFrom}">${humanizeStartDate(dateFrom)}</time>
+                <time class="event__date" datetime="${ dateFrom }">${ humanizeStartDate(dateFrom) }</time>
                 <div class="event__type">
-                  <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
+                  <img class="event__type-icon" width="42" height="42" src="img/icons/${ type }.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${type} ${destinationNameTemplate}</h3>
+                <h3 class="event__title">${ type } ${ destinationNameTemplate }</h3>
                 <div class="event__schedule">
                   <p class="event__time">
-                    <time class="event__start-time" datetime ="${dateFrom}">${humanizeHour(dateFrom)}</time>
+                    <time class="event__start-time" datetime ="${ dateFrom }">${ humanizeHour(dateFrom) }</time>
                     &mdash;
-                    <time class="event__end-time" datetime="${dateTo}">${humanizeHour(dateTo)}</time>
+                    <time class="event__end-time" datetime="${ dateTo }">${ humanizeHour(dateTo) }</time>
                   </p>
-                  <p class="event__duration">${createDifferenceTimeFormat()}${'mm'}</p>
+                  <p class="event__duration">${ createDifferenceTimeFormat() }</p>
                 </div>
                 <p class="event__price">
-                  &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
+                  &euro;&nbsp;<span class="event__price-value">${ basePrice }</span>
                 </p>
                 <h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
 
-                    ${selectedOffers}
+                    ${ selectedOffers }
 
                 </ul>
                 <button class="event__favorite-btn  event__favorite-btn--active" type="button">
@@ -70,6 +69,7 @@ const destinationElementTemplate = (points) => {
 };
 
 export default class DestinationView {
+  #element = null;
   constructor(point) {
     this.point = point;
   }
@@ -78,14 +78,14 @@ export default class DestinationView {
     return destinationElementTemplate(this.point);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.getTemplate());
     }
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

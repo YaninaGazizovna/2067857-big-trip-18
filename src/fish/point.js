@@ -8,7 +8,6 @@ import {
   PICTURES
 } from './data.js';
 
-
 const generateType = () => {
   const type = EVENT_TYPE;
 
