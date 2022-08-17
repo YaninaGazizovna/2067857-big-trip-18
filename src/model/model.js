@@ -1,5 +1,6 @@
 import { generatePoint } from '../fish/point.js';
-import { DESTINATION_VIEW_COUNT } from '../data.js';
+
+const DESTINATION_VIEW_COUNT = 10;
 
 
 export default class PointModel {

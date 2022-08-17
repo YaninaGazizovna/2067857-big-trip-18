@@ -20,7 +20,7 @@ function getMixArray(array) {
   return arrayMixLength;
 }
 
-const humanizeDate = (dueDate) => dayjs(dueDate).format('DD/MM/YY H:00');
+const humanizeDate = (dueDate) => dayjs(dueDate).format('DD/MM/YY H:MM');
 const humanizeHour = (dueDate) => dayjs(dueDate).format(' HH:00');
 const humanizeStartDate = (dueDate) => dayjs(dueDate).format('MMMM DD');
 const differenceHoursMinutes = (dateFrom,dateTo) => dayjs(dateTo).diff(dayjs(dateFrom),'hour','minute');

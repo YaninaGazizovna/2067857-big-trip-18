@@ -4,7 +4,7 @@ import {
 import {
   EVENT_TYPE,
   DESTINATION_NAME,
-} from '../data.js';
+} from '../fish/data.js';
 import {
   destinations,
   offer,
