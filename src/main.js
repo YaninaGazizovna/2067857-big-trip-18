@@ -12,10 +12,10 @@ const tripControls = document.querySelector('.trip-main__trip-controls');
 const tripEventsSection = document.querySelector('.trip-events');
 
 const pointModel = new PointModel();
-const mainPagePresenter = new MainPagePresenter();
+const mainPagePresenter = new MainPagePresenter(tripEventsSection, pointModel);
 
 
 render(new FilterView(), tripControls);
 render(new SortView(), tripEventsSection);
 
-mainPagePresenter.init(tripEventsSection, pointModel);
+mainPagePresenter.init();
