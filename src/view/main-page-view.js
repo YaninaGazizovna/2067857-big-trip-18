@@ -1,6 +1,6 @@
 import { createElement } from '../render.js';
 
-const mainPageTemplate = () => ' <ul class="trip-events__list"></ul>';
+const mainPageTemplate = () => '<ul class="trip-events__list"></ul>';
 
 export default class MainPageView {
   #element = null;
