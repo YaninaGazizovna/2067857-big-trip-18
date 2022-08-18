@@ -6,8 +6,7 @@ import {
   EVENT_TYPE,
   OFFER_TYPE_TITLE,
   PICTURES
-} from '../data.js';
-
+} from './data.js';
 
 const generateType = () => {
   const type = EVENT_TYPE;

@@ -1,4 +1,7 @@
 import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+
+dayjs.extend(duration);
 
 const getRandomInteger = (min, max) => {
   min = Math.ceil(min);
@@ -20,10 +23,11 @@ function getMixArray(array) {
   return arrayMixLength;
 }
 
-const humanizeDate = (dueDate) => dayjs(dueDate).format('DD/MM/YY H:00');
-const humanizeHour = (dueDate) => dayjs(dueDate).format(' HH:00');
+const humanizeDate = (dueDate) => dayjs(dueDate).format('DD/MM/YY H:MM');
+const humanizeHour = (dueDate) => dayjs(dueDate).format(' HH:MM');
 const humanizeStartDate = (dueDate) => dayjs(dueDate).format('MMMM DD');
-const differenceHoursMinutes = (dateFrom,dateTo) => dayjs(dateTo).diff(dayjs(dateFrom),'hour','minute');
+const formatHoursMinutes = (minutes) => dayjs.duration(minutes, 'minutes').format('H[H] mm[MM]');
+const differenceMinutes = (dateFrom,dateTo) => dayjs(dateTo).diff(dayjs(dateFrom),'minute');
 
 
-export { getRandomInteger, getMixArray, humanizeDate, humanizeHour, humanizeStartDate, differenceHoursMinutes };
+export { getRandomInteger, getMixArray, humanizeDate, humanizeHour, humanizeStartDate, differenceMinutes, formatHoursMinutes };

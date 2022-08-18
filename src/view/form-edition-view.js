@@ -2,7 +2,7 @@ import { createElement } from '../render.js';
 import {
   EVENT_TYPE,
   DESTINATION_NAME,
-} from '../data.js';
+} from '../fish/data.js';
 import {
   destinations,
   offer,
@@ -123,6 +123,7 @@ const EditionFormElementTemplate = (points) => {
 };
 
 export default class FormEditionView {
+  #element = null;
   constructor(point) {
     this.point = point;
   }
@@ -131,14 +132,14 @@ export default class FormEditionView {
     return EditionFormElementTemplate(this.point);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.getTemplate());
     }
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

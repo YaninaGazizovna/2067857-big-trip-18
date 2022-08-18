@@ -30,18 +30,19 @@ const sortElementTemplate = () => (
 );
 
 export default class SortView {
+  #element = null;
   getTemplate(){
     return sortElementTemplate;
   }
 
-  getElement(){
-    if(!this.element){
-      this.element = createElement(this.getTemplate());
+  get element(){
+    if(!this.#element){
+      this.#element = createElement(this.getTemplate());
     }
-    return this.element;
+    return this.#element;
   }
 
   removeElement(){
-    this.element = null;
+    this.#element = null;
   }
 }

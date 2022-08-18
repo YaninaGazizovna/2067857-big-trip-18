@@ -4,12 +4,11 @@ import {
 import {
   EVENT_TYPE,
   DESTINATION_NAME,
-} from '../data.js';
+} from '../fish/data.js';
 import {
   destinations,
   offer,
 } from '../fish/point.js';
-
 import { humanizeDate } from '../util.js';
 
 const createTypeTemplate = (currentType) => EVENT_TYPE.map((type) =>
@@ -131,8 +130,8 @@ const creationFormElementTemplate = (points = {}) => {
 </li>`);
 };
 
-
 export default class FormCreationView {
+  #element = null;
   constructor(point) {
     this.point = point;
   }
@@ -141,16 +140,14 @@ export default class FormCreationView {
     return creationFormElementTemplate(this.point);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.getTemplate());
     }
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
-
-

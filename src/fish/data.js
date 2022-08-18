@@ -1,5 +1,3 @@
-const DESTINATION_VIEW_COUNT = 10;
-
 const EVENT_TYPE = [
   'taxi',
   'bus',
@@ -38,6 +36,5 @@ export {
   EVENT_TYPE,
   DESTINATION_NAME,
   PICTURES,
-  DESTINATION_VIEW_COUNT,
   OFFER_TYPE_TITLE,
 };
