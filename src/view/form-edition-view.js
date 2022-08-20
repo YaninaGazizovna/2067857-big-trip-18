@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {
   EVENT_TYPE,
   DESTINATION_NAME,
@@ -122,24 +122,36 @@ const EditionFormElementTemplate = (points) => {
             </li>`;
 };
 
-export default class FormEditionView {
-  #element = null;
+export default class FormEditionView extends AbstractView{
+  #point = null;
   constructor(point) {
+    super();
     this.point = point;
   }
 
-  getTemplate() {
+  get template() {
     return EditionFormElementTemplate(this.point);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.getTemplate());
-    }
-    return this.#element;
-  }
+  setFormSaveHandler = (callback) => {
+    this._callback.formSave = callback;
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#formSaveHandler);
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  #formSaveHandler = (evt)=>{
+    evt.preventDefault();
+    this._callback.formSave();
+  };
+
+  setRollupEditHandler = (callback) => {
+    this._callback.rollupEdit = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupEditHandler);
+  };
+
+  #rollupEditHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.rollupEdit();
+  };
 }
+
+

@@ -1,9 +1,7 @@
 import FilterView from './view/filter-view.js';
 import SortView from './view/sort-view.js';
 import MainPagePresenter from './presenter/main-page-presenter.js';
-import {
-  render
-} from './render.js';
+import { render } from './framework/render.js';
 import PointModel from './model/model.js';
 
 

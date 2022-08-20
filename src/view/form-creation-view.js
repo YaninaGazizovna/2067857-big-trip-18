@@ -1,6 +1,4 @@
-import {
-  createElement
-} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {
   EVENT_TYPE,
   DESTINATION_NAME,
@@ -130,24 +128,15 @@ const creationFormElementTemplate = (points = {}) => {
 </li>`);
 };
 
-export default class FormCreationView {
-  #element = null;
+export default class FormCreationView extends AbstractView{
+  #point = null;
   constructor(point) {
+    super();
     this.point = point;
   }
 
-  getTemplate() {
+  get template() {
     return creationFormElementTemplate(this.point);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.getTemplate());
-    }
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
 }
