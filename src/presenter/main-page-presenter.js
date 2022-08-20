@@ -4,7 +4,7 @@ import {
 import FormEditionView from '../view/form-edition-view.js';
 import MainPageView from '../view/main-page-view.js';
 import DestinationView from '../view/destination-view.js';
-import MessageView from '../message-view.js';
+import MessageView from '../view/message-view.js';
 
 export default class MainPagePresenter {
 
@@ -58,18 +58,17 @@ export default class MainPagePresenter {
       }
     };
 
-    destinationComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+    destinationComponent.setDestinationEditHandler (() => {
       replaceDestinationToEdition();
       document.addEventListener('keydown', onEscapeKeyDown);
     });
 
-    formEditionComponent.element.querySelector('.event__save-btn').addEventListener('click', (evt) => {
-      evt.preventDefault();
+    formEditionComponent.setFormSaveHandler (() => {
       replaceEditionToDestination();
       document.removeEventListener('keydown', onEscapeKeyDown);
     });
 
-    formEditionComponent.element.querySelector('.event__rollup-btn').addEventListener('click',()=>{
+    formEditionComponent.setRollupEditHandler (() => {
       replaceEditionToDestination();
     });
 

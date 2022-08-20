@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { humanizeHour, humanizeStartDate, formatHoursMinutes, differenceMinutes } from '../util.js';
 import {
   destinations,
@@ -68,24 +68,24 @@ const destinationElementTemplate = (points) => {
                   </ul>`;
 };
 
-export default class DestinationView {
-  #element = null;
+export default class DestinationView extends AbstractView {
+  #point = null;
   constructor(point) {
+    super();
     this.point = point;
   }
 
-  getTemplate() {
+  get template() {
     return destinationElementTemplate(this.point);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.getTemplate());
-    }
-    return this.#element;
-  }
+  setDestinationEditHandler = (callback) => {
+    this._callback.destinationEdit = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#destinationEditHandler);
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  #destinationEditHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.destinationEdit();
+  };
 }
