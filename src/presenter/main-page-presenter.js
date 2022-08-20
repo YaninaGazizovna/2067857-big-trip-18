@@ -1,6 +1,4 @@
-import {
-  render
-} from '../render.js';
+import { render, replace } from '../framework/render.js';
 import FormEditionView from '../view/form-edition-view.js';
 import MainPageView from '../view/main-page-view.js';
 import DestinationView from '../view/destination-view.js';
@@ -43,11 +41,11 @@ export default class MainPagePresenter {
     const formEditionComponent = new FormEditionView(point);
 
     const replaceDestinationToEdition = () => {
-      this.#mainPageComponents.element.replaceChild(formEditionComponent.element, destinationComponent.element);
+      replace(formEditionComponent, destinationComponent);
     };
 
     const replaceEditionToDestination = () => {
-      this.#mainPageComponents.element.replaceChild(destinationComponent.element, formEditionComponent.element);
+      replace(destinationComponent, formEditionComponent);
     };
 
     const onEscapeKeyDown = (evt) =>{
