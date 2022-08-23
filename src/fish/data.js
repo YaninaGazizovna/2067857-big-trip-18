@@ -32,9 +32,26 @@ const OFFER_TYPE_TITLE = [
   'Switch to comfort class'
 ];
 
+const FilterType = {
+  'EVERYTHING':'everything',
+  'FUTURE':'future',
+  'PAST':'past'
+};
+
+const SortType = {
+  'DAY':'day',
+  'EVENT':'event',
+  'TIME':'time',
+  'PRICE':'price',
+  'OFFER':'offers'
+
+};
+
 export {
   EVENT_TYPE,
   DESTINATION_NAME,
   PICTURES,
   OFFER_TYPE_TITLE,
+  FilterType,
+  SortType,
 };

@@ -126,11 +126,11 @@ export default class FormEditionView extends AbstractView{
   #point = null;
   constructor(point) {
     super();
-    this.point = point;
+    this.#point = point;
   }
 
   get template() {
-    return EditionFormElementTemplate(this.point);
+    return EditionFormElementTemplate(this.#point);
   }
 
   setFormSaveHandler = (callback) => {
