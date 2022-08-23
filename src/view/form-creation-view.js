@@ -132,11 +132,11 @@ export default class FormCreationView extends AbstractView{
   #point = null;
   constructor(point) {
     super();
-    this.point = point;
+    this.#point = point;
   }
 
   get template() {
-    return creationFormElementTemplate(this.point);
+    return creationFormElementTemplate(this.#point);
   }
 
 }

@@ -74,7 +74,7 @@ export const destinations = [{
 ];
 
 export const generatePoint = () => ({
-  basePrice: 2220,
+  basePrice: getRandomInteger(1000,3000),
   dateFrom: '2019-07-10T22:55:56.845Z',
   dateTo: '2019-07-11T11:22:13.375Z',
   id: getRandomInteger(1,3),

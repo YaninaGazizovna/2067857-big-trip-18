@@ -1,5 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { humanizeHour, humanizeStartDate, formatHoursMinutes, differenceMinutes } from '../util.js';
+import {
+  humanizeHour,
+  humanizeStartDate,
+  formatHoursMinutes,
+  differenceMinutes
+} from '../util.js';
 import {
   destinations,
   offer,
@@ -13,6 +18,7 @@ const destinationElementTemplate = (points) => {
     basePrice,
     destination
   } = points;
+
   const destinationNameTemplate = destinations.find((el) => (el.id === destination)).name;
   const pointOfferType = offer.filter((el) => (el.type === type));
 
@@ -22,8 +28,8 @@ const destinationElementTemplate = (points) => {
       <span class="event__offer-price">${el.price}</span>
     </li>`).join('');
 
-  const createDifferenceTimeFormat = () =>{
-    const differenceResult = differenceMinutes(dateFrom,dateTo);
+  const createDifferenceTimeFormat = () => {
+    const differenceResult = differenceMinutes(dateFrom, dateTo);
     const humanizeDifferenceFormat = formatHoursMinutes(differenceResult);
 
     return humanizeDifferenceFormat;
@@ -70,13 +76,14 @@ const destinationElementTemplate = (points) => {
 
 export default class DestinationView extends AbstractView {
   #point = null;
+
   constructor(point) {
     super();
-    this.point = point;
+    this.#point = point;
   }
 
   get template() {
-    return destinationElementTemplate(this.point);
+    return destinationElementTemplate(this.#point);
   }
 
   setDestinationEditHandler = (callback) => {
