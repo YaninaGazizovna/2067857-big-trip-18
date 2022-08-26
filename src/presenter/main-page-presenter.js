@@ -1,16 +1,19 @@
-import { render, replace } from '../framework/render.js';
-import FormEditionView from '../view/form-edition-view.js';
+import { render } from '../framework/render.js';
 import MainPageView from '../view/main-page-view.js';
-import DestinationView from '../view/destination-view.js';
 import MessageView from '../view/message-view.js';
+import PointPresenter from './point-presenter.js';
+import { updateItem } from '../util.js';
 
 export default class MainPagePresenter {
 
   #mainPageComponents = new MainPageView();
   #messageComponent = new MessageView();
+
   #pointModel = null;
   #pageContainer = null;
   #boardPoint = [];
+
+  #pointPresenter = new Map();
 
   constructor (pageContainer, pointModel){
     this.#pageContainer = pageContainer;
@@ -22,6 +25,15 @@ export default class MainPagePresenter {
     this.#boardPoint = [...this.#pointModel.points];
     this.#renderPage();
 
+  };
+
+  #handleModeChange = () => {
+    this.#pointPresenter.forEach((presenter) => presenter.resetView());
+  };
+
+  #handlePointChange = (updatedPoint) =>{
+    this.#boardPoint = updateItem(this.#boardPoint ,updatedPoint);
+    this.#pointPresenter.get(updatedPoint.id).init(updatedPoint);
   };
 
   #renderPage = () => {
@@ -37,39 +49,13 @@ export default class MainPagePresenter {
   };
 
   #renderPoint = (point) => {
-    const destinationComponent = new DestinationView(point);
-    const formEditionComponent = new FormEditionView(point);
+    const pointPresenter = new PointPresenter(this.#mainPageComponents.element, this.#handlePointChange, this.#handleModeChange);
+    pointPresenter.init(point);
+    this.#pointPresenter.set(point.id,pointPresenter);
+  };
 
-    const replaceDestinationToEdition = () => {
-      replace(formEditionComponent, destinationComponent);
-    };
-
-    const replaceEditionToDestination = () => {
-      replace(destinationComponent, formEditionComponent);
-    };
-
-    const onEscapeKeyDown = (evt) =>{
-      if(evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        replaceEditionToDestination();
-        document.removeEventListener('keydown', onEscapeKeyDown);
-      }
-    };
-
-    destinationComponent.setDestinationEditHandler (() => {
-      replaceDestinationToEdition();
-      document.addEventListener('keydown', onEscapeKeyDown);
-    });
-
-    formEditionComponent.setFormSaveHandler (() => {
-      replaceEditionToDestination();
-      document.removeEventListener('keydown', onEscapeKeyDown);
-    });
-
-    formEditionComponent.setRollupEditHandler (() => {
-      replaceEditionToDestination();
-    });
-
-    render(destinationComponent, this.#mainPageComponents.element);
+  #clearPointList = () =>{
+    this.#pointPresenter.forEach((presenter) => presenter.destroy());
+    this.#pointPresenter.clear();
   };
 }

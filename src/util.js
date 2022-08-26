@@ -37,6 +37,20 @@ const isFuture = (dueDate) => dueDate && dayjs().isBefore(dueDate, 'D');
 const isPast = (dueDate) => dueDate && dayjs().isAfter(dueDate, 'D');
 const isSame = (dueDate) => dueDate && dayjs(dueDate).isSame(dayjs(), 'D');
 
+const updateItem = (items, update) => {
+  const index = items.findIndex((item) => item.id === update.id);
+
+  if (index === -1) {
+    return items;
+  }
+
+  return [
+    ...items.slice(0, index),
+    update,
+    ...items.slice(index + 1),
+  ];
+};
+
 export {
   getRandomInteger,
   getMixArray,
@@ -48,4 +62,5 @@ export {
   humanizeStartDate,
   differenceMinutes,
   formatHoursMinutes,
+  updateItem,
 };
