@@ -7,6 +7,7 @@ import {
   OFFER_TYPE_TITLE,
   PICTURES
 } from './data.js';
+import { nanoid } from 'nanoid';
 
 const generateType = () => {
   const type = EVENT_TYPE;
@@ -77,9 +78,9 @@ export const generatePoint = () => ({
   basePrice: getRandomInteger(1000,3000),
   dateFrom: '2019-07-10T22:55:56.845Z',
   dateTo: '2019-07-11T11:22:13.375Z',
-  id: getRandomInteger(1,3),
+  id: nanoid(),
   destination: getRandomInteger(1,3),
-  isFavorite: false,
+  isFavorite: Boolean(getRandomInteger(0, 1)),
   offers: getRandomInteger(1,3),
   type: generateType(),
 });
