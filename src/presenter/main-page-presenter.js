@@ -1,8 +1,7 @@
-import { render, replace } from '../framework/render.js';
-import FormEditionView from '../view/form-edition-view.js';
+import { render } from '../framework/render.js';
 import MainPageView from '../view/main-page-view.js';
-import DestinationView from '../view/destination-view.js';
 import MessageView from '../view/message-view.js';
+import PointPresenter from './point-presenter.js';
 
 export default class MainPagePresenter {
 
@@ -37,39 +36,7 @@ export default class MainPagePresenter {
   };
 
   #renderPoint = (point) => {
-    const destinationComponent = new DestinationView(point);
-    const formEditionComponent = new FormEditionView(point);
-
-    const replaceDestinationToEdition = () => {
-      replace(formEditionComponent, destinationComponent);
-    };
-
-    const replaceEditionToDestination = () => {
-      replace(destinationComponent, formEditionComponent);
-    };
-
-    const onEscapeKeyDown = (evt) =>{
-      if(evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        replaceEditionToDestination();
-        document.removeEventListener('keydown', onEscapeKeyDown);
-      }
-    };
-
-    destinationComponent.setDestinationEditHandler (() => {
-      replaceDestinationToEdition();
-      document.addEventListener('keydown', onEscapeKeyDown);
-    });
-
-    formEditionComponent.setFormSaveHandler (() => {
-      replaceEditionToDestination();
-      document.removeEventListener('keydown', onEscapeKeyDown);
-    });
-
-    formEditionComponent.setRollupEditHandler (() => {
-      replaceEditionToDestination();
-    });
-
-    render(destinationComponent, this.#mainPageComponents.element);
+    const pointPresenter = new PointPresenter(this.#mainPageComponents.element);
+    pointPresenter.init(point);
   };
 }
