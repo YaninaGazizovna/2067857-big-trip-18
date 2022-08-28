@@ -150,7 +150,7 @@ export default class FormEditionView extends AbstractView{
 
   #rollupEditHandler = (evt) => {
     evt.preventDefault();
-    this._callback.rollupEdit();
+    this._callback.rollupEdit((this.#point));
   };
 }
 
