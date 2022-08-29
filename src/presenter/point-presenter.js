@@ -54,14 +54,7 @@ export default class PointPresenter {
 
     remove(prevDestinationComponent);
     remove(prevFormEditionComponent);
-
-    // this.#renderSort();
-
   };
-
-  // #renderSort = () => {
-  //   render(this.#sortComponent, this.#mainPageComponents, RenderPosition.BEFOREBEGIN);
-  // };
 
   destroy = () => {
     remove(this.#destinationComponent);
