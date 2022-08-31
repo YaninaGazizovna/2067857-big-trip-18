@@ -1,16 +1,19 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { SortType } from '../fish/data.js';
+import {
+  SortType
+} from '../fish/data.js';
 
 const createSortElementTemplate = () => {
 
   const sortTypeTemplate = () => Object.values(SortType).map((name) => {
     const isDisabled = name === 'offers' || name === 'event';
-    const checked = (name === 'day') ? 'checked' : '';
+    const isChecked = !isDisabled;
 
     return `<div class="trip-sort__item  trip-sort__item--${ name }">
-            <input id="sort-${ name }" ${checked} class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${ name }" ${ isDisabled ? 'disabled' : '' }>
-              <label class="trip-sort__btn" data-sort-type="${ name }" for="sort-${ name }">${ name }</label>
-          </div>`;}).join('');
+            <input id="sort-${ name }"data-sort-type="${ name }" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${ name }" ${ isDisabled ? 'disabled' : '' } ${isChecked ? 'checked' : ''}>
+              <label class="trip-sort__btn" data-sort-type="${ name }" for="sort-${ name }"> ${ name }</label>
+          </div>`;
+  }).join('');
 
   return sortTypeTemplate;
 };
@@ -28,7 +31,7 @@ const sortElementTemplate = () => {
 };
 
 export default class SortView extends AbstractView {
-  get template(){
+  get template() {
     return sortElementTemplate();
   }
 
@@ -38,8 +41,19 @@ export default class SortView extends AbstractView {
   };
 
   #sortTypeChangeHandler = (evt) => {
-    evt.preventDefault();
+    const inputElement = this.element.querySelectorAll('input');
 
+    if (evt.target.dataset.sortType === 'offers' || evt.target.dataset.sortType === 'event') {
+      return;
+    }
+    inputElement.forEach((element) => {
+      if (evt.target.dataset.sortType === element.dataset.sortType) {
+
+        element.checked = true;
+      }
+    });
+
+    evt.preventDefault();
     this._callback.sortTypeChange(evt.target.dataset.sortType);
   };
 }

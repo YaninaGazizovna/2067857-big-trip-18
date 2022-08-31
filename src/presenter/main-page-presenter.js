@@ -3,7 +3,7 @@ import MainPageView from '../view/main-page-view.js';
 import MessageView from '../view/message-view.js';
 import PointPresenter from './point-presenter.js';
 import SortView from '../view/sort-view.js';
-import { updateItem, sortByPointPrice, sortByPointDuration } from '../util.js';
+import { updateItem, sortByPointPrice, sortByPointDuration, sortByPointDate } from '../util.js';
 import { SortType } from '../fish/data.js';
 
 export default class MainPagePresenter {
@@ -52,6 +52,9 @@ export default class MainPagePresenter {
         break;
       case SortType.TIME:
         this.#boardPoint.sort(sortByPointDuration);
+        break;
+      case SortType.DAY:
+        this.#boardPoint.sort(sortByPointDate);
         break;
 
       default:

@@ -29,7 +29,7 @@ const humanizeDate = (dueDate) => dayjs(dueDate).format('DD/MM/YY H:MM');
 const humanizeHour = (dueDate) => dayjs(dueDate).format(' HH:MM');
 const humanizeStartDate = (dueDate) => dayjs(dueDate).format('MMMM DD');
 const formatHoursMinutes = (minutes) =>
-  dayjs.duration(minutes, 'minutes').format('M[m] DD[d] H[H] mm[M]');
+  dayjs.duration(minutes, 'minutes').format('DD[d] H[H] mm[M]');
 const differenceMinutes = (dateFrom, dateTo) =>
   dayjs(dateTo).diff(dayjs(dateFrom), 'minute');
 
@@ -78,6 +78,12 @@ const sortByPointPrice = (pointA, pointB) => {
   return weight ?? pointB.basePrice - pointA.basePrice;
 };
 
+const sortByPointDate = (pointA, pointB) => {
+  const weight = getSortWeight(pointA.dateFrom, pointB.dateFrom);
+
+  return weight ?? dayjs(pointB.dateFrom).diff(dayjs(pointA.dateFrom));
+};
+
 export {
   getRandomInteger,
   getMixArray,
@@ -92,4 +98,5 @@ export {
   updateItem,
   sortByPointDuration,
   sortByPointPrice,
+  sortByPointDate,
 };
