@@ -32,6 +32,21 @@ const OFFER_TYPE_TITLE = [
   'Switch to comfort class'
 ];
 
+const DATE_FROM = [
+  '2019-07-10T23:50:56.845Z',
+  '2019-07-09T23:45:56.845Z',
+  '2019-07-11T21:52:56.845Z',
+  '2019-07-12T19:55:56.845Z'
+];
+
+const DATE_TO = [
+  '2019-07-11T11:20:13.375Z',
+  '2019-07-12T23:50:56.845Z',
+  '2019-07-18T23:21:13.375Z',
+  '2019-07-22T13:23:13.375Z',
+  '2019-07-19T11:23:13.375Z',
+];
+
 const FilterType = {
   'EVERYTHING':'everything',
   'FUTURE':'future',
@@ -39,12 +54,11 @@ const FilterType = {
 };
 
 const SortType = {
-  'DAY':'day',
-  'EVENT':'event',
-  'TIME':'time',
-  'PRICE':'price',
-  'OFFER':'offers'
-
+  DAY:'day',
+  EVENT:'event',
+  TIME:'time',
+  PRICE:'price',
+  OFFER:'offers'
 };
 
 export {
@@ -52,6 +66,8 @@ export {
   DESTINATION_NAME,
   PICTURES,
   OFFER_TYPE_TITLE,
+  DATE_FROM,
+  DATE_TO,
   FilterType,
   SortType,
 };

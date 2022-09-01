@@ -11,13 +11,13 @@ import { humanizeDate } from '../util.js';
 
 const createTypeTemplate = (currentType) => EVENT_TYPE.map((type) =>
   `<div class="event__type-item">
-   <input id="event-type-${type}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${currentType === 'checked'}>
-   <label class="event__type-label  event__type-label--${type}" for="event-type-${type}">${type}</label>
+   <input id="event-type-${ type }" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${ type }" ${ currentType === 'checked' }>
+   <label class="event__type-label  event__type-label--${ type }" for="event-type-${ type }">${ type }</label>
    </div>`).join('');
 
 const createDestinationNamesListTemplate = () => (
   DESTINATION_NAME.map((name) =>
-    `<option value="${name}"></option>`));
+    `<option value="${ name }"></option>`));
 
 const creationFormElementTemplate = (points = {}) => {
   const {
@@ -34,7 +34,7 @@ const creationFormElementTemplate = (points = {}) => {
   const picturesTemplate = destinations.find((el) => (el.id === destination)).pictures[0].src;
   const pictureDescriptionTemplate = destinations.find((el) => (el.id === destination)).pictures[0].description;
   const createPhotosTemplate = () => picturesTemplate.map((picture) =>
-    `<img class="event__photo" src= "${picture}" alt="${pictureDescriptionTemplate}">`);
+    `<img class="event__photo" src= "${ picture }" alt="${ pictureDescriptionTemplate }">`);
 
   const destinationNameListTemplate = createDestinationNamesListTemplate(destination);
 

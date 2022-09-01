@@ -17,10 +17,12 @@ export default class PointPresenter {
   #changeMode = null;
   #mode = Mode.DEFAULT;
 
+
   constructor (mainPageComponents, changeData, changeMode){
     this.#mainPageComponents = mainPageComponents;
     this.#changeData = changeData;
     this.#changeMode = changeMode;
+
   }
 
   init = (point) => {
@@ -52,10 +54,9 @@ export default class PointPresenter {
 
     remove(prevDestinationComponent);
     remove(prevFormEditionComponent);
-
   };
 
-  destroy = () =>{
+  destroy = () => {
     remove(this.#destinationComponent);
     remove(this.#formEditionComponent);
   };

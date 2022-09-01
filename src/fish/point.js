@@ -5,7 +5,9 @@ import {
 import {
   EVENT_TYPE,
   OFFER_TYPE_TITLE,
-  PICTURES
+  PICTURES,
+  DATE_FROM,
+  DATE_TO,
 } from './data.js';
 import { nanoid } from 'nanoid';
 
@@ -23,6 +25,22 @@ const generateOfferTitle = () => {
   const randomTypeIndex = getRandomInteger(0, title.length - 1);
 
   return title[randomTypeIndex];
+};
+
+const generateDateFrom = () => {
+  const date = DATE_FROM;
+
+  const randomDateIndex = getRandomInteger(0, date.length - 1);
+
+  return date[randomDateIndex];
+};
+
+const generateDateTo = () => {
+  const date = DATE_TO;
+
+  const randomDateIndex = getRandomInteger(0, date.length - 1);
+
+  return date[randomDateIndex];
 };
 
 export const offer = [{
@@ -76,8 +94,8 @@ export const destinations = [{
 
 export const generatePoint = () => ({
   basePrice: getRandomInteger(1000,3000),
-  dateFrom: '2019-07-10T22:55:56.845Z',
-  dateTo: '2019-07-11T11:22:13.375Z',
+  dateFrom: generateDateFrom(DATE_FROM),
+  dateTo: generateDateTo(DATE_TO),
   id: nanoid(),
   destination: getRandomInteger(1,3),
   isFavorite: Boolean(getRandomInteger(0, 1)),
