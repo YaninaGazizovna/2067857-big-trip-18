@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {
   EVENT_TYPE,
   DESTINATION_NAME,
@@ -7,7 +7,9 @@ import {
   destinations,
   offer,
 } from '../fish/point.js';
-import { humanizeDate } from '../util.js';
+import {
+  humanizeDate
+} from '../util.js';
 
 const createTypeEditTemplate = (currentType) => EVENT_TYPE.map((type) =>
   `<div class="event__type-item">
@@ -21,27 +23,46 @@ const editDestinationNamesListTemplate = () => (
 
 const EditionFormElementTemplate = (points) => {
   const {
-    basePrice ,
+    basePrice,
     dateFrom,
     dateTo,
     type,
     destination,
     offers,
+    destinationNameTemplate = destinations.find((el) => (el.id === destination)).name,
   } = points;
 
   const typeEditTemplate = createTypeEditTemplate(type);
   const destinationNameListTemplate = editDestinationNamesListTemplate(destination);
-  const destinationNameTemplate = destinations.find((el) => (el.id === destination)).name;
-  const descriptionTemplate = destinations.find((el) => (el.id === destination)).description;
+  const descriptionTemplate = destinations.map((el) => {
+    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
+      return null;
+    }
+    if (el.name === destinationNameTemplate){
+      return el.description;
+    }
+  }).join('');
+
+  const pictureDescriptionTemplate = destinations.find((el) => (el.id === destination)).pictures[0].description;
+
+  const picturesTemplate = destinations.map((el) => {
+    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
+      return null;
+    }
+
+    if(el.name === destinationNameTemplate){
+      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ pictureDescriptionTemplate }">`);
+    }
+  }).join('');
 
   const pointOfferType = offer.filter((el) => (el.type === type));
 
   const PointOfferTemplate = pointOfferType.map((el) => {
-    const checked = (offers === el.id ) ? 'checked' : '';
+    const checked = (offers === el.id) ? 'checked' : '';
 
     return ` <div class="event__offer-selector">
-              <input class="event__offer-checkbox visually-hidden" id="event-offer-luggage-1" type="checkbox" ${ checked } name="event-offer-luggage">
-              <label class="event__offer-label" for="event-offer-luggage-1">
+              <input class="event__offer-checkbox visually-hidden" id="event-offer-${ el.title }" type="checkbox" ${ checked } name="event-offer-${ el.title }">
+              <label class="event__offer-label" for="event-offer-${ el.title }">
               <span class="event__offer-title"> ${ el.title } </span>
               &plus;&euro;&nbsp;
               <span class="event__offer-price"> ${ el.price } </span>
@@ -72,10 +93,10 @@ const EditionFormElementTemplate = (points) => {
                     <label class="event__label  event__type-output" for="event-destination-1">
                     ${ type }
                     </label>
-                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${ destinationNameTemplate }" list="destination-list-1">
+                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${ destinationNameTemplate }" list="destination-list-1" >
                     <datalist id="destination-list-1">
 
-                    ${ destinationNameListTemplate }
+                    ${ destinationNameListTemplate}
 
                     </datalist>
                   </div>
@@ -107,7 +128,7 @@ const EditionFormElementTemplate = (points) => {
                     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
                     <div class="event__available-offers">
-                    ${PointOfferTemplate}
+                    ${ PointOfferTemplate }
 
                       </div>
                     </div>
@@ -116,31 +137,40 @@ const EditionFormElementTemplate = (points) => {
                   <section class="event__section  event__section--destination">
                     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
                     <p class="event__destination-description">${ descriptionTemplate }</p>
+                    <div class="event__photos-container">
+    <div class="event__photos-tape">
+
+      ${ picturesTemplate }
+
+      </div>
+        </div>
                   </section>
                 </section>
               </form>
             </li>`;
 };
 
-export default class FormEditionView extends AbstractView{
-  #point = null;
+export default class FormEditionView extends AbstractStatefulView {
+
   constructor(point) {
     super();
-    this.#point = point;
+    this._state = FormEditionView.parsePointToState(point);
+
+    this.#setInnerHandlers();
   }
 
   get template() {
-    return EditionFormElementTemplate(this.#point);
+    return EditionFormElementTemplate(this._state);
   }
 
   setFormSaveHandler = (callback) => {
     this._callback.formSave = callback;
-    this.element.querySelector('.event__save-btn').addEventListener('click', this.#formSaveHandler);
+    this.element.querySelector('form').addEventListener('submit', this.#formSaveHandler);
   };
 
-  #formSaveHandler = (evt)=>{
+  #formSaveHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSave(this.#point);
+    this._callback.formSave(FormEditionView.parseStateToPoint(this._state));
   };
 
   setRollupEditHandler = (callback) => {
@@ -148,10 +178,53 @@ export default class FormEditionView extends AbstractView{
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupEditHandler);
   };
 
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setFormSaveHandler(this._callback.formSave);
+    this.setRollupEditHandler(this._callback.rollupEdit);
+  };
+
   #rollupEditHandler = (evt) => {
     evt.preventDefault();
-    this._callback.rollupEdit((this.#point));
+    this._callback.rollupEdit(FormEditionView.parsePointToState(this._state));
+  };
+
+  #typeToggleHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      type: evt.target.value,
+    });
+  };
+
+  #destinationToggleHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      destinationNameTemplate: evt.target.value,
+    });
+  };
+
+  #setInnerHandlers = () => {
+    this.element.querySelectorAll('.event__type-input').forEach((i) =>
+      i.addEventListener('click', this.#typeToggleHandler));
+
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationToggleHandler);
+  };
+
+  reset = (point) => {
+    this.updateElement(
+      FormEditionView.parsePointToState(point)
+    );
+  };
+
+  static parsePointToState = (point) => ({
+    ...point
+  });
+
+  static parseStateToPoint = (state) => {
+    const point = {
+      ...state
+    };
+
+    return point;
   };
 }
-
-
