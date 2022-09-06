@@ -18,9 +18,9 @@ const destinationElementTemplate = (points) => {
     basePrice,
     destination,
     isFavorite,
+    destinationNameTemplate = destinations.find((el) => (el.id === destination)).name,
   } = points;
 
-  const destinationNameTemplate = destinations.find((el) => (el.id === destination)).name;
   const pointOfferType = offer.filter((el) => (el.type === type));
 
   const favoriteClassName = isFavorite

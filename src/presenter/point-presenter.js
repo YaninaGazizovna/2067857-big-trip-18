@@ -63,6 +63,7 @@ export default class PointPresenter {
 
   resetView = () => {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#formEditionComponent.reset(this.#point);
       this.#replaceEditionToDestination();
     }
   };
@@ -76,7 +77,8 @@ export default class PointPresenter {
     this.#replaceEditionToDestination();
   };
 
-  #handleRollupClick = () =>{
+  #handleRollupClick = () => {
+    this.#formEditionComponent.reset(this.#point);
     this.#replaceEditionToDestination();
   };
 
@@ -87,6 +89,7 @@ export default class PointPresenter {
   #onEscapeKeyDown = (evt) =>{
     if(evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
+      this.#formEditionComponent.reset(this.#point);
       this.#replaceEditionToDestination();
     }
   };
