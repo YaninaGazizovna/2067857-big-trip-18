@@ -10,6 +10,9 @@ import {
 import {
   humanizeDate
 } from '../util.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/themes/confetti.css';
+
 
 const createTypeEditTemplate = (currentType) => EVENT_TYPE.map((type) =>
   `<div class="event__type-item">
@@ -151,6 +154,7 @@ const EditionFormElementTemplate = (points) => {
 };
 
 export default class FormEditionView extends AbstractStatefulView {
+  #datepicker = null;
 
   constructor(point) {
     super();
@@ -182,6 +186,7 @@ export default class FormEditionView extends AbstractStatefulView {
     this.#setInnerHandlers();
     this.setFormSaveHandler(this._callback.formSave);
     this.setRollupEditHandler(this._callback.rollupEdit);
+    this.#setDatepicker();
   };
 
   #rollupEditHandler = (evt) => {
@@ -206,8 +211,29 @@ export default class FormEditionView extends AbstractStatefulView {
   #setInnerHandlers = () => {
     this.element.querySelectorAll('.event__type-input').forEach((i) =>
       i.addEventListener('click', this.#typeToggleHandler));
+    this.#setDatepicker();
 
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationToggleHandler);
+  };
+
+  #datesChangeHandler = ([userDateFrom,userDateTo]) => {
+    this.updateElement({
+      dateFrom: userDateFrom,
+      dateTo:userDateTo
+    });
+  };
+
+  #setDatepicker = () => {
+    this.#datepicker = flatpickr(
+      this.element.querySelectorAll('.event__input--time'),
+      {
+        enableTime: true,
+        mode: 'range',
+        minDate: 'today',
+        dateFormat: 'j/m/y / h:i',
+        onChange: this.#datesChangeHandler,
+      },
+    );
   };
 
   reset = (point) => {

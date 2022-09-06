@@ -27,7 +27,7 @@ function getMixArray(array) {
 
 const humanizeDate = (dueDate) => dayjs(dueDate).format('DD/MM/YY H:MM');
 const humanizeHour = (dueDate) => dayjs(dueDate).format(' HH:MM');
-const humanizeStartDate = (dueDate) => dayjs(dueDate).format('MMMM DD');
+const humanizeStartDate = (dueDate) => dayjs(dueDate).format('MMM DD');
 const formatHoursMinutes = (minutes) =>
   dayjs.duration(minutes, 'minutes').format('DD[d] H[H] mm[M]');
 const differenceMinutes = (dateFrom, dateTo) =>
