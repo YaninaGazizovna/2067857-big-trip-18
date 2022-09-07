@@ -31,8 +31,16 @@ const sortElementTemplate = () => {
 };
 
 export default class SortView extends AbstractView {
+  #currentSortType = null;
+
+  constructor (currentSortType){
+    super();
+
+    this.#currentSortType = currentSortType;
+  }
+
   get template() {
-    return sortElementTemplate();
+    return sortElementTemplate(this.#currentSortType);
   }
 
   setSortTypeChangeHandler = (callback) => {

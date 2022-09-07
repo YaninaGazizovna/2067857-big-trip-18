@@ -177,21 +177,32 @@ export default class FormEditionView extends AbstractStatefulView {
     this._callback.formSave(FormEditionView.parseStateToPoint(this._state));
   };
 
+  setDeleteClickHandler = (callback) => {
+    this._callback.deleteClick = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
+  };
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.deleteClick(FormEditionView.parseStateToPoint(this._state));
+  };
+
   setRollupEditHandler = (callback) => {
     this._callback.rollupEdit = callback;
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupEditHandler);
   };
 
-  _restoreHandlers = () => {
-    this.#setInnerHandlers();
-    this.setFormSaveHandler(this._callback.formSave);
-    this.setRollupEditHandler(this._callback.rollupEdit);
-    this.#setDatepicker();
-  };
-
   #rollupEditHandler = (evt) => {
     evt.preventDefault();
     this._callback.rollupEdit(FormEditionView.parsePointToState(this._state));
+  };
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setFormSaveHandler(this._callback.formSave);
+    this.setDeleteClickHandler(this._callback.deleteClick);
+    this.setRollupEditHandler(this._callback.rollupEdit);
+    this.#setDatepicker();
   };
 
   #typeToggleHandler = (evt) => {
