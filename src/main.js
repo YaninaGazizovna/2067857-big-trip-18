@@ -1,19 +1,17 @@
-import FilterView from './view/filter-view.js';
 import MainPagePresenter from './presenter/main-page-presenter.js';
-import { render } from './framework/render.js';
+import FilterPresenter from './presenter/filter-presenter.js';
 import PointModel from './model/model.js';
-import { generateFilter } from './fish/filter.js';
+import FilterModel from './model/filter-model.js';
 
 const tripControls = document.querySelector('.trip-main__trip-controls');
 
 const tripEventsSection = document.querySelector('.trip-events');
 
 const pointModel = new PointModel();
+const filterModel = new FilterModel();
 
-const mainPagePresenter = new MainPagePresenter(tripEventsSection, pointModel);
-
-const filters = generateFilter(pointModel.points);
-
-render(new FilterView(filters), tripControls);
+const mainPagePresenter = new MainPagePresenter(tripEventsSection, pointModel,filterModel);
+const filterPresenter = new FilterPresenter(tripControls, filterModel, pointModel);
 
 mainPagePresenter.init();
+filterPresenter.init();

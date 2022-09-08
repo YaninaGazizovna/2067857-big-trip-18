@@ -4,41 +4,50 @@ import MessageView from '../view/message-view.js';
 import PointPresenter from './point-presenter.js';
 import SortView from '../view/sort-view.js';
 import { sortByPointPrice, sortByPointDuration, sortByPointDate } from '../util.js';
-import { SortType, UserAction, UpdateType } from '../fish/data.js';
+import { SortType, UserAction, UpdateType, FilterType } from '../fish/data.js';
+import { filter } from '../fish/filter.js';
 
 export default class MainPagePresenter {
 
   #mainPageComponents = new MainPageView();
-  #messageComponent = new MessageView();
+  #messageComponent = null;
 
   #pointModel = null;
   #pageContainer = null;
+  #filterModel = null;
 
   #pointPresenter = new Map();
 
   #sortComponent = null;
   #currentSortType = SortType.DAY;
+  #filterType = FilterType.EVERYTHING;
 
-  constructor (pageContainer, pointModel){
+  constructor (pageContainer, pointModel, filterModel){
     this.#pageContainer = pageContainer;
     this.#pointModel = pointModel;
+    this.#filterModel = filterModel;
 
     this.#pointModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get points (){
+    this.#filterType = this.#filterModel.filter;
+    const points = this.#pointModel.points;
+    const filteredPoints = filter[this.#filterType](points);
+
     switch (this.#currentSortType){
       case SortType.PRICE:
-        return [...this.#pointModel.points].sort(sortByPointPrice);
+        return filteredPoints.sort(sortByPointPrice);
 
       case SortType.TIME:
-        return [...this.#pointModel.points].sort(sortByPointDuration);
+        return filteredPoints.sort(sortByPointDuration);
 
       case SortType.DAY:
-        return [...this.#pointModel.points].sort(sortByPointDate);
+        return filteredPoints.sort(sortByPointDate);
     }
 
-    return this.#pointModel.points;
+    return filteredPoints;
   }
 
   init = () => {
@@ -119,6 +128,7 @@ export default class MainPagePresenter {
     this.#renderSort();
 
     if (pointsCount === 0){
+      this.#messageComponent = new MessageView(this.#filterType);
       render( this.#messageComponent, this.#mainPageComponents.element);
     }
 
@@ -127,8 +137,6 @@ export default class MainPagePresenter {
   };
 
   #clearPage = ({resetSortType = false} = {}) => {
-    //const pointCount = this.points.length;
-
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
 

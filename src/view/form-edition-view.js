@@ -8,7 +8,7 @@ import {
   offer,
 } from '../fish/point.js';
 import {
-  humanizeDate
+  humanizeDate,
 } from '../util.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/themes/confetti.css';

@@ -1,7 +1,7 @@
 import { generatePoint } from '../fish/point.js';
 import Observable from '../framework/observable.js';
 
-const DESTINATION_VIEW_COUNT = 10;
+const DESTINATION_VIEW_COUNT = 3;
 
 export default class PointModel extends Observable {
   #points = Array.from({length: DESTINATION_VIEW_COUNT},generatePoint);
