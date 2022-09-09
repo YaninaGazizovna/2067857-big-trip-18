@@ -46,15 +46,13 @@ const EditionFormElementTemplate = (points) => {
     }
   }).join('');
 
-  const pictureDescriptionTemplate = destinations.find((el) => (el.id === destination)).pictures[0].description;
-
   const picturesTemplate = destinations.map((el) => {
     if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
       return null;
     }
 
     if(el.name === destinationNameTemplate){
-      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ pictureDescriptionTemplate }">`);
+      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ el.pictures[0].description }">`);
     }
   }).join('');
 

@@ -2,6 +2,7 @@ import { render, RenderPosition,remove } from '../framework/render.js';
 import MainPageView from '../view/main-page-view.js';
 import MessageView from '../view/message-view.js';
 import PointPresenter from './point-presenter.js';
+import NewPointPresenter from './new-point-presenter.js';
 import SortView from '../view/sort-view.js';
 import { sortByPointPrice, sortByPointDuration, sortByPointDate } from '../util.js';
 import { SortType, UserAction, UpdateType, FilterType } from '../fish/data.js';
@@ -17,6 +18,7 @@ export default class MainPagePresenter {
   #filterModel = null;
 
   #pointPresenter = new Map();
+  #newPointPresenter = null;
 
   #sortComponent = null;
   #currentSortType = SortType.DAY;
@@ -26,6 +28,8 @@ export default class MainPagePresenter {
     this.#pageContainer = pageContainer;
     this.#pointModel = pointModel;
     this.#filterModel = filterModel;
+
+    this.#newPointPresenter = new NewPointPresenter(this.#mainPageComponents.element, this.#handleViewAction);
 
     this.#pointModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -52,6 +56,12 @@ export default class MainPagePresenter {
 
   init = () => {
     this.#renderPage();
+  };
+
+  createTask = (callback) => {
+    this.#currentSortType = SortType.DAY;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#newPointPresenter.init(callback);
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -89,6 +99,7 @@ export default class MainPagePresenter {
   };
 
   #handleModeChange = () => {
+    this.#newPointPresenter.destroy();
     this.#pointPresenter.forEach((presenter) => presenter.resetView());
   };
 
@@ -137,6 +148,7 @@ export default class MainPagePresenter {
   };
 
   #clearPage = ({resetSortType = false} = {}) => {
+    this.#newPointPresenter.destroy();
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
 
@@ -144,7 +156,7 @@ export default class MainPagePresenter {
     remove(this.#messageComponent);
 
     if (resetSortType) {
-      this.#currentSortType = SortType.DEFAULT;
+      this.#currentSortType = SortType.DAY;
     }
   };
 }
