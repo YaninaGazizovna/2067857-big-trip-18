@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {
   EVENT_TYPE,
   DESTINATION_NAME,
@@ -7,7 +7,20 @@ import {
   destinations,
   offer,
 } from '../fish/point.js';
-import { humanizeDate } from '../util.js';
+import {
+  humanizeDate
+} from '../util.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/themes/confetti.css';
+
+
+const BLANK_POINT = {
+  basePrice: '',
+  dateFrom:'2021-07-10T11:50:56.845Z',
+  dateTo:'2021-07-11T14:20:13.375Z',
+  type:'taxi',
+  destinationNameTemplate:''
+};
 
 const createTypeTemplate = (currentType) => EVENT_TYPE.map((type) =>
   `<div class="event__type-item">
@@ -21,22 +34,37 @@ const createDestinationNamesListTemplate = () => (
 
 const creationFormElementTemplate = (points = {}) => {
   const {
-    basePrice = '2000',
-    dateFrom = '2019-07-10T22:55:56.845Z',
-    dateTo = '2019-07-11T11:22:13.375Z',
-    type = 'taxi',
+    basePrice,
+    dateFrom,
+    dateTo,
+    type,
     destination,
     offers,
+    destinationNameTemplate,
   } = points;
 
-  const destinationNameTemplate = destinations.find((el) => (el.id === destination)).name;
-  const descriptionTemplate = destinations.find((el) => (el.id === destination)).description;
-  const picturesTemplate = destinations.find((el) => (el.id === destination)).pictures[0].src;
-  const pictureDescriptionTemplate = destinations.find((el) => (el.id === destination)).pictures[0].description;
-  const createPhotosTemplate = () => picturesTemplate.map((picture) =>
-    `<img class="event__photo" src= "${ picture }" alt="${ pictureDescriptionTemplate }">`);
-
+  const typeTemplate = createTypeTemplate(type);
   const destinationNameListTemplate = createDestinationNamesListTemplate(destination);
+
+  const descriptionTemplate = destinations.map((el) => {
+    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
+      return null;
+    }
+
+    if (el.name === destinationNameTemplate){
+      return el.description;
+    }
+  }).join('');
+
+  const picturesTemplate = destinations.map((el) => {
+    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
+      return null;
+    }
+
+    if(el.name === destinationNameTemplate){
+      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ el.pictures[0].description }">`).join('');
+    }
+  }).join('');
 
   const pointOfferType = offer.filter((el) => (el.type === type));
 
@@ -50,9 +78,7 @@ const creationFormElementTemplate = (points = {}) => {
               &plus;&euro;&nbsp;
               <span class="event__offer-price"> ${ el.price } </span>
               </div>`;
-  });
-
-  const typeTemplate = createTypeTemplate(type);
+  }).join('');
 
   return (
     `<li class="trip-events__item">
@@ -77,7 +103,7 @@ const creationFormElementTemplate = (points = {}) => {
       <label class="event__label  event__type-output" for="event-destination-1">
       ${ type }
       </label>
-      <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${ destinationNameTemplate }" list="destination-list-1">
+      <input class="event__input  event__input--destination" id="event-destination-1" pattern="${ DESTINATION_NAME.join('|')} "type="text" name="event-destination" value='${destinationNameTemplate}' list="destination-list-1">
       <datalist id="destination-list-1">
 
       ${ destinationNameListTemplate }
@@ -98,7 +124,7 @@ const creationFormElementTemplate = (points = {}) => {
         ${ basePrice } &euro;
 
       </label>
-      <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="">
+      <input class="event__input  event__input--price" pattern="[0-9]+" id="event-price-1" type="number" name="event-price" value="">
     </div>
     <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
     <button class="event__reset-btn" type="reset">Cancel</button>
@@ -117,7 +143,7 @@ const creationFormElementTemplate = (points = {}) => {
   <div class="event__photos-container">
     <div class="event__photos-tape">
 
-      ${ createPhotosTemplate() }
+      ${ picturesTemplate }
 
       </div>
         </div>
@@ -128,15 +154,105 @@ const creationFormElementTemplate = (points = {}) => {
 </li>`);
 };
 
-export default class FormCreationView extends AbstractView{
-  #point = null;
-  constructor(point) {
+export default class FormCreationView extends AbstractStatefulView {
+  #datepicker = null;
+
+  constructor(point = BLANK_POINT) {
     super();
-    this.#point = point;
+    this._state = FormCreationView.parsePointToState(point);
+
+    this.#setInnerHandlers();
   }
 
   get template() {
-    return creationFormElementTemplate(this.#point);
+    return creationFormElementTemplate(this._state);
   }
+
+  setFormSaveHandler = (callback) => {
+    this._callback.formSave = callback;
+    this.element.querySelector('form').addEventListener('submit', this.#formSaveHandler);
+  };
+
+  #formSaveHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSave(FormCreationView.parseStateToPoint(this._state));
+  };
+
+  setDeleteClickHandler = (callback) => {
+    this._callback.deleteClick = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
+  };
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.deleteClick(FormCreationView.parseStateToPoint(this._state));
+  };
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setFormSaveHandler(this._callback.formSave);
+    this.setDeleteClickHandler(this._callback.deleteClick);
+    this.#setDatepicker();
+  };
+
+  #typeToggleHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      type: evt.target.value,
+    });
+  };
+
+  #destinationToggleHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      destinationNameTemplate: evt.target.value,
+    });
+  };
+
+  #setInnerHandlers = () => {
+    this.element.querySelectorAll('.event__type-input').forEach((i) =>
+      i.addEventListener('click', this.#typeToggleHandler));
+    this.#setDatepicker();
+
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationToggleHandler);
+  };
+
+  #datesChangeHandler = ([userDateFrom,userDateTo]) => {
+    this.updateElement({
+      dateFrom: userDateFrom,
+      dateTo:userDateTo
+    });
+  };
+
+  #setDatepicker = () => {
+    this.#datepicker = flatpickr(
+      this.element.querySelectorAll('.event__input--time'),
+      {
+        enableTime: true,
+        mode: 'range',
+        minDate: 'today',
+        dateFormat: 'j/m/y / h:i',
+        onChange: this.#datesChangeHandler,
+      },
+    );
+  };
+
+  reset = (points) => {
+    this.updateElement(
+      FormCreationView.parsePointToState(points)
+    );
+  };
+
+  static parsePointToState = (point) => ({
+    ...point
+  });
+
+  static parseStateToPoint = (state) => {
+    const points = {
+      ...state
+    };
+
+    return points;
+  };
 
 }

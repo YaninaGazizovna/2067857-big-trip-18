@@ -33,23 +33,9 @@ const formatHoursMinutes = (minutes) =>
 const differenceMinutes = (dateFrom, dateTo) =>
   dayjs(dateTo).diff(dayjs(dateFrom), 'minute');
 
-const isFuture = (dueDate) => dueDate && dayjs().isBefore(dueDate, 'D');
-const isPast = (dueDate) => dueDate && dayjs().isAfter(dueDate, 'D');
-const isSame = (dueDate) => dueDate && dayjs(dueDate).isSame(dayjs(), 'D');
-
-const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1),
-  ];
-};
+const isFuture = (dueDate) => dayjs(dueDate).isAfter(dayjs());
+const isPast = (dueDate) => dayjs(dueDate).isBefore(dayjs());
+const isSame = (dueDate) => dayjs(dueDate).isSame(dayjs());
 
 const getSortWeight = (pointA, pointB) => {
   if (pointA < pointB) {
@@ -84,6 +70,8 @@ const sortByPointDate = (pointA, pointB) => {
   return weight ?? dayjs(pointB.dateFrom).diff(dayjs(pointA.dateFrom));
 };
 
+const isDatesEqual = (dateA, dateB) => dayjs(dateA).isSame(dateB);
+
 export {
   getRandomInteger,
   getMixArray,
@@ -95,8 +83,8 @@ export {
   humanizeStartDate,
   differenceMinutes,
   formatHoursMinutes,
-  updateItem,
   sortByPointDuration,
   sortByPointPrice,
   sortByPointDate,
+  isDatesEqual
 };

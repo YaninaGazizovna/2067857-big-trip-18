@@ -1,6 +1,8 @@
 import { render, replace, remove } from '../framework/render.js';
 import FormEditionView from '../view/form-edition-view.js';
 import DestinationView from '../view/destination-view.js';
+import {UserAction, UpdateType} from '../fish/data.js';
+import { isDatesEqual } from '../util.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -36,6 +38,7 @@ export default class PointPresenter {
 
     this.#destinationComponent.setDestinationEditHandler(this.#handleEditClick);
     this.#formEditionComponent.setFormSaveHandler(this.#handleFormSaving);
+    this.#formEditionComponent.setDeleteClickHandler(this.#handleDeleteClick);
     this.#formEditionComponent.setRollupEditHandler(this.#handleRollupClick);
     this.#destinationComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
 
@@ -72,9 +75,24 @@ export default class PointPresenter {
     this.#replaceDestinationToEdition();
   };
 
-  #handleFormSaving = (point) => {
-    this.#changeData(point);
+  #handleFormSaving = (update) => {
+    const isMinorUpdate = !isDatesEqual(this.#point.dateFrom, update.dateFrom) ||
+    !isDatesEqual(this.#point.dateTo, update.dateTo);
+
+    this.#changeData(
+      UserAction.UPDATE_POINT,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+      update,
+    );
     this.#replaceEditionToDestination();
+  };
+
+  #handleDeleteClick = (point) => {
+    this.#changeData(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      point,
+    );
   };
 
   #handleRollupClick = () => {

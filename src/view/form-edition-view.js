@@ -8,7 +8,7 @@ import {
   offer,
 } from '../fish/point.js';
 import {
-  humanizeDate
+  humanizeDate,
 } from '../util.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/themes/confetti.css';
@@ -46,15 +46,13 @@ const EditionFormElementTemplate = (points) => {
     }
   }).join('');
 
-  const pictureDescriptionTemplate = destinations.find((el) => (el.id === destination)).pictures[0].description;
-
   const picturesTemplate = destinations.map((el) => {
     if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
       return null;
     }
 
     if(el.name === destinationNameTemplate){
-      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ pictureDescriptionTemplate }">`);
+      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ el.pictures[0].description }">`).join('');
     }
   }).join('');
 
@@ -70,7 +68,7 @@ const EditionFormElementTemplate = (points) => {
               &plus;&euro;&nbsp;
               <span class="event__offer-price"> ${ el.price } </span>
               </div>`;
-  });
+  }).join('');
 
   return `<li class="trip-events__item">
               <form class="event event--edit" action="#" method="post">
@@ -96,7 +94,7 @@ const EditionFormElementTemplate = (points) => {
                     <label class="event__label  event__type-output" for="event-destination-1">
                     ${ type }
                     </label>
-                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${ destinationNameTemplate }" list="destination-list-1" >
+                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" pattern="${DESTINATION_NAME.join('|' )} name="event-destination" value="${ destinationNameTemplate }" list="destination-list-1" >
                     <datalist id="destination-list-1">
 
                     ${ destinationNameListTemplate}
@@ -117,7 +115,7 @@ const EditionFormElementTemplate = (points) => {
                       <span class="visually-hidden">Price</span>
                       &euro;
                     </label>
-                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${ basePrice }">
+                    <input class="event__input  event__input--price" id="event-price-1" type="number" pattern="[0-9]+" name="event-price" value="${ basePrice }">
                   </div>
 
                   <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -177,21 +175,32 @@ export default class FormEditionView extends AbstractStatefulView {
     this._callback.formSave(FormEditionView.parseStateToPoint(this._state));
   };
 
+  setDeleteClickHandler = (callback) => {
+    this._callback.deleteClick = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
+  };
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.deleteClick(FormEditionView.parseStateToPoint(this._state));
+  };
+
   setRollupEditHandler = (callback) => {
     this._callback.rollupEdit = callback;
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupEditHandler);
   };
 
-  _restoreHandlers = () => {
-    this.#setInnerHandlers();
-    this.setFormSaveHandler(this._callback.formSave);
-    this.setRollupEditHandler(this._callback.rollupEdit);
-    this.#setDatepicker();
-  };
-
   #rollupEditHandler = (evt) => {
     evt.preventDefault();
     this._callback.rollupEdit(FormEditionView.parsePointToState(this._state));
+  };
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setFormSaveHandler(this._callback.formSave);
+    this.setDeleteClickHandler(this._callback.deleteClick);
+    this.setRollupEditHandler(this._callback.rollupEdit);
+    this.#setDatepicker();
   };
 
   #typeToggleHandler = (evt) => {
