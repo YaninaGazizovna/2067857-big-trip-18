@@ -58,7 +58,7 @@ export default class MainPagePresenter {
     this.#renderPage();
   };
 
-  createTask = (callback) => {
+  createPoint = (callback) => {
     this.#currentSortType = SortType.DAY;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     this.#newPointPresenter.init(callback);

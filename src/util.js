@@ -33,9 +33,9 @@ const formatHoursMinutes = (minutes) =>
 const differenceMinutes = (dateFrom, dateTo) =>
   dayjs(dateTo).diff(dayjs(dateFrom), 'minute');
 
-const isFuture = (dueDate) => dayjs(dueDate).isAfter(dayjs().format( 'DD/MM/YY H:MM'));
-const isPast = (dueDate) => dayjs(dueDate).isBefore(dayjs().format( 'DD/MM/YY H:MM'));
-const isSame = (dueDate) => dayjs(dueDate).isSame(dayjs().format( 'DD/MM/YY H:MM'));
+const isFuture = (dueDate) => dayjs(dueDate).isAfter(dayjs());
+const isPast = (dueDate) => dayjs(dueDate).isBefore(dayjs());
+const isSame = (dueDate) => dayjs(dueDate).isSame(dayjs());
 
 const getSortWeight = (pointA, pointB) => {
   if (pointA < pointB) {

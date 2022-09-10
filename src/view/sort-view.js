@@ -5,13 +5,12 @@ import {
 
 const createSortElementTemplate = () => {
 
-  const sortTypeTemplate = () => Object.values(SortType).map((name) => {
+  const sortTypeTemplate = (currentSortType) => Object.values(SortType).map((name) => {
     const isDisabled = name === 'offers' || name === 'event';
-    const isChecked = !isDisabled;
 
     return `<div class="trip-sort__item  trip-sort__item--${ name }">
-            <input id="sort-${ name }"data-sort-type="${ name }" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${ name }" ${ isDisabled ? 'disabled' : '' } ${isChecked ? 'checked' : ''}>
-              <label class="trip-sort__btn" data-sort-type="${ name }" for="sort-${ name }"> ${ name }</label>
+            <input id="sort-${ name }"data-sort-type="${ name }" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${ name }" ${ isDisabled ? 'disabled' : '' }>
+              <label class="trip-sort__btn" data-sort-type="${ name }" for="sort-${ name }" ${ currentSortType === name ? 'checked' : ''}> ${ name }</label>
           </div>`;
   }).join('');
 
@@ -46,6 +45,7 @@ export default class SortView extends AbstractView {
   setSortTypeChangeHandler = (callback) => {
     this._callback.sortTypeChange = callback;
     this.element.addEventListener('click', this.#sortTypeChangeHandler);
+
   };
 
   #sortTypeChangeHandler = (evt) => {

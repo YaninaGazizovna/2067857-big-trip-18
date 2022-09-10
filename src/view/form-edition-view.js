@@ -52,7 +52,7 @@ const EditionFormElementTemplate = (points) => {
     }
 
     if(el.name === destinationNameTemplate){
-      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ el.pictures[0].description }">`);
+      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ el.pictures[0].description }">`).join('');
     }
   }).join('');
 
@@ -68,7 +68,7 @@ const EditionFormElementTemplate = (points) => {
               &plus;&euro;&nbsp;
               <span class="event__offer-price"> ${ el.price } </span>
               </div>`;
-  });
+  }).join('');
 
   return `<li class="trip-events__item">
               <form class="event event--edit" action="#" method="post">
@@ -94,7 +94,7 @@ const EditionFormElementTemplate = (points) => {
                     <label class="event__label  event__type-output" for="event-destination-1">
                     ${ type }
                     </label>
-                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${ destinationNameTemplate }" list="destination-list-1" >
+                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" pattern="${DESTINATION_NAME.join('|' )} name="event-destination" value="${ destinationNameTemplate }" list="destination-list-1" >
                     <datalist id="destination-list-1">
 
                     ${ destinationNameListTemplate}
@@ -115,7 +115,7 @@ const EditionFormElementTemplate = (points) => {
                       <span class="visually-hidden">Price</span>
                       &euro;
                     </label>
-                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${ basePrice }">
+                    <input class="event__input  event__input--price" id="event-price-1" type="number" pattern="[0-9]+" name="event-price" value="${ basePrice }">
                   </div>
 
                   <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>

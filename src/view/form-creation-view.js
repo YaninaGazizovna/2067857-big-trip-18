@@ -15,7 +15,7 @@ import 'flatpickr/dist/themes/confetti.css';
 
 
 const BLANK_POINT = {
-  basePrice: null,
+  basePrice: '',
   dateFrom:'2021-07-10T11:50:56.845Z',
   dateTo:'2021-07-11T14:20:13.375Z',
   type:'taxi',
@@ -41,7 +41,6 @@ const creationFormElementTemplate = (points = {}) => {
     destination,
     offers,
     destinationNameTemplate,
-    pictureDescriptionTemplate
   } = points;
 
   const typeTemplate = createTypeTemplate(type);
@@ -63,10 +62,7 @@ const creationFormElementTemplate = (points = {}) => {
     }
 
     if(el.name === destinationNameTemplate){
-      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ pictureDescriptionTemplate }">`);
-    }
-    if(el.name === destinationNameTemplate){
-      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ pictureDescriptionTemplate }">`);
+      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ el.pictures[0].description }">`).join('');
     }
   }).join('');
 
@@ -82,7 +78,7 @@ const creationFormElementTemplate = (points = {}) => {
               &plus;&euro;&nbsp;
               <span class="event__offer-price"> ${ el.price } </span>
               </div>`;
-  });
+  }).join('');
 
   return (
     `<li class="trip-events__item">
@@ -107,7 +103,7 @@ const creationFormElementTemplate = (points = {}) => {
       <label class="event__label  event__type-output" for="event-destination-1">
       ${ type }
       </label>
-      <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${ destinationNameTemplate }" list="destination-list-1">
+      <input class="event__input  event__input--destination" id="event-destination-1" pattern="${ DESTINATION_NAME.join('|')} "type="text" name="event-destination" value='${destinationNameTemplate}' list="destination-list-1">
       <datalist id="destination-list-1">
 
       ${ destinationNameListTemplate }
@@ -128,7 +124,7 @@ const creationFormElementTemplate = (points = {}) => {
         ${ basePrice } &euro;
 
       </label>
-      <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="">
+      <input class="event__input  event__input--price" pattern="[0-9]+" id="event-price-1" type="number" name="event-price" value="">
     </div>
     <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
     <button class="event__reset-btn" type="reset">Cancel</button>

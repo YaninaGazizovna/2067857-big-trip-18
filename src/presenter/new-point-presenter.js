@@ -5,7 +5,7 @@ import { UserAction, UpdateType, } from '../fish/data.js';
 
 export default class NewPointPresenter {
   #mainPageComponents = null;
-  #formEditionComponent = null;
+  #formCreationComponent = null;
   #destroyCallback = null;
   #changeData = null;
 
@@ -17,29 +17,29 @@ export default class NewPointPresenter {
   init = (callback) => {
     this.#destroyCallback = callback;
 
-    if (this.#formEditionComponent !== null) {
+    if (this.#formCreationComponent !== null) {
       return;
     }
 
-    this.#formEditionComponent = new FormCreationView();
+    this.#formCreationComponent = new FormCreationView();
 
-    this.#formEditionComponent.setFormSaveHandler(this.#handleFormSaving);
-    this.#formEditionComponent.setDeleteClickHandler(this.#handleDeleteClick);
+    this.#formCreationComponent.setFormSaveHandler(this.#handleFormSaving);
+    this.#formCreationComponent.setDeleteClickHandler(this.#handleDeleteClick);
 
-    render(this.#formEditionComponent, this.#mainPageComponents, RenderPosition.BEFOREBEGIN);
+    render(this.#formCreationComponent, this.#mainPageComponents, RenderPosition.BEFOREBEGIN);
 
     document.addEventListener('keydown', this.#onEscapeKeyDown);
   };
 
   destroy = () => {
-    if (this.#formEditionComponent === null) {
+    if (this.#formCreationComponent === null) {
       return;
     }
 
     this.#destroyCallback?.();
 
-    remove(this.#formEditionComponent);
-    this.#formEditionComponent = null;
+    remove(this.#formCreationComponent);
+    this.#formCreationComponent = null;
 
     document.removeEventListener('keydown', this.#onEscapeKeyDown);
   };

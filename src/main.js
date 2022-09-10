@@ -22,7 +22,7 @@ const handleNewPointFormClose = () => {
 };
 
 const handleNewPointButtonClick = () => {
-  mainPagePresenter.createTask(handleNewPointFormClose);
+  mainPagePresenter.createPoint(handleNewPointFormClose);
   newPointButton.element.disabled = true;
 };
 
