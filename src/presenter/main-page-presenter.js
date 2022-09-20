@@ -1,6 +1,7 @@
 import { render, RenderPosition,remove } from '../framework/render.js';
 import MainPageView from '../view/main-page-view.js';
 import MessageView from '../view/message-view.js';
+import LoadingView from '../view/loading-view.js';
 import PointPresenter from './point-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
 import SortView from '../view/sort-view.js';
@@ -11,14 +12,17 @@ import { filter } from '../fish/filter.js';
 export default class MainPagePresenter {
 
   #mainPageComponents = new MainPageView();
+  #loadingComponent = new LoadingView();
   #messageComponent = null;
-
   #pointModel = null;
   #pageContainer = null;
   #filterModel = null;
+  #destinations = null;
+  #offers = null;
 
   #pointPresenter = new Map();
   #newPointPresenter = null;
+  #isLoading = true;
 
   #sortComponent = null;
   #currentSortType = SortType.DAY;
@@ -54,6 +58,11 @@ export default class MainPagePresenter {
     return filteredPoints;
   }
 
+  get destinations (){
+    const destinations = this.#pointModel.destinations;
+    return destinations;
+  }
+
   init = () => {
     this.#renderPage();
   };
@@ -77,6 +86,12 @@ export default class MainPagePresenter {
 
       case UpdateType.MAJOR:
         this.#clearPage({resetSortType: true});
+        this.#renderPage();
+        break;
+
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
         this.#renderPage();
         break;
     }
@@ -113,14 +128,18 @@ export default class MainPagePresenter {
     this.#renderPage();
   };
 
-  #renderPoint = (point) => {
+  #renderLoading = () => {
+    render(this.#loadingComponent, this.#mainPageComponents.element, RenderPosition.AFTERBEGIN);
+  };
+
+  #renderPoint = (point,destinations) => {
     const pointPresenter = new PointPresenter(this.#mainPageComponents.element, this.#handleViewAction, this.#handleModeChange);
-    pointPresenter.init(point);
+    pointPresenter.init(point,destinations);
     this.#pointPresenter.set(point.id, pointPresenter);
   };
 
   #renderPoints = (points) => {
-    points.forEach((point) =>this.#renderPoint(point));
+    points.forEach((point) => this.#renderPoint(point));
   };
 
   #renderSort = () => {
@@ -131,10 +150,15 @@ export default class MainPagePresenter {
   };
 
   #renderPage = () => {
+    render(this.#mainPageComponents, this.#pageContainer);
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
     const points = this.points;
     const pointsCount = points.length;
-
-    render(this.#mainPageComponents, this.#pageContainer);
 
     this.#renderSort();
 
@@ -151,6 +175,7 @@ export default class MainPagePresenter {
     this.#newPointPresenter.destroy();
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
+    remove(this.#loadingComponent);
 
     remove(this.#sortComponent);
     remove(this.#messageComponent);

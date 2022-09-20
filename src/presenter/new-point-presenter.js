@@ -1,6 +1,5 @@
 import { render, RenderPosition,remove } from '../framework/render.js';
 import FormCreationView from '../view/form-creation-view.js';
-import { nanoid } from 'nanoid';
 import { UserAction, UpdateType, } from '../fish/data.js';
 
 export default class NewPointPresenter {
@@ -8,20 +7,24 @@ export default class NewPointPresenter {
   #formCreationComponent = null;
   #destroyCallback = null;
   #changeData = null;
+  #pointModel = null;
 
-  constructor (mainPageComponents, changeData){
+  constructor (mainPageComponents, changeData,pointModel){
     this.#mainPageComponents = mainPageComponents;
     this.#changeData = changeData;
+    this.#pointModel = pointModel;
   }
 
   init = (callback) => {
     this.#destroyCallback = callback;
+    const destinations = [...this.#pointModel.destinations];
+    const offers = [...this.#pointModel.offers];
 
     if (this.#formCreationComponent !== null) {
       return;
     }
 
-    this.#formCreationComponent = new FormCreationView();
+    this.#formCreationComponent = new FormCreationView(destinations,offers);
 
     this.#formCreationComponent.setFormSaveHandler(this.#handleFormSaving);
     this.#formCreationComponent.setDeleteClickHandler(this.#handleDeleteClick);
@@ -49,8 +52,7 @@ export default class NewPointPresenter {
     this.#changeData(
       UserAction.ADD_POINT,
       UpdateType.MINOR,
-
-      { id: nanoid(), ...points },
+      points
     );
     this.destroy();
   };

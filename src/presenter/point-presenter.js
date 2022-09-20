@@ -19,12 +19,10 @@ export default class PointPresenter {
   #changeMode = null;
   #mode = Mode.DEFAULT;
 
-
   constructor (mainPageComponents, changeData, changeMode){
     this.#mainPageComponents = mainPageComponents;
     this.#changeData = changeData;
     this.#changeMode = changeMode;
-
   }
 
   init = (point) => {
@@ -34,7 +32,7 @@ export default class PointPresenter {
     const prevFormEditionComponent = this.#formEditionComponent;
 
     this.#destinationComponent = new DestinationView(point);
-    this.#formEditionComponent = new FormEditionView(point);
+    this.#formEditionComponent = new FormEditionView(point/*,this.#offers, this.#destinations*/);
 
     this.#destinationComponent.setDestinationEditHandler(this.#handleEditClick);
     this.#formEditionComponent.setFormSaveHandler(this.#handleFormSaving);
@@ -124,5 +122,5 @@ export default class PointPresenter {
     document.removeEventListener('keydown', this.#onEscapeKeyDown);
     this.#mode = Mode.DEFAULT;
   };
-
 }
+
