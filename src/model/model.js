@@ -1,52 +1,138 @@
-import { generatePoint } from '../fish/point.js';
 import Observable from '../framework/observable.js';
-
-const DESTINATION_VIEW_COUNT = 3;
+import { UpdateType } from '../fish/data.js';
 
 export default class PointModel extends Observable {
-  #points = Array.from({length: DESTINATION_VIEW_COUNT},generatePoint);
+  #pointApiService = null;
+
+  #points = [];
+  #destinations = [];
+  #offers = [];
+
 
   get points (){
     return this.#points;
   }
 
-  updatePoint = (updateType, update) => {
+  get destinations (){
+    return this.#destinations;
+  }
+
+  get offers (){
+    return this.#offers;
+  }
+
+  init = async () => {
+    try {
+      const points = await this.#pointApiService.points;
+      this.#destinations = await this.#pointApiService.destinations;
+      this.#offers = await this.#pointApiService.offers;
+      this.#points = points.map(this.#adaptToClient);
+
+      this.#points = points.map(this.#adaptToClient).map((point) => this.#supplementPoint(point));
+    }
+
+    catch(err) {
+      this.#points = [];
+    }
+
+    this._notify(UpdateType.INIT);
+  };
+
+  constructor(pointApiService) {
+    super();
+    this.#pointApiService = pointApiService;
+  }
+
+  updatePoint = async(updateType, update) => {
     const index = this.points.findIndex((point) => point.id === update.id);
 
     if (index === -1) {
       throw new Error ('Can\'t update unexisting point');
     }
 
-    this.#points = [
-      ...this.points.slice(0, index),
-      update,
-      ...this.points.slice(index + 1),
-    ];
+    try {
+      const response = await this.#pointApiService.updatePoint(update);
+      const updatedPoint = this.#supplementPoint(this.#adaptToClient(response));
 
-    this._notify(updateType, update);
+      this.#points = [
+        ...this.#points.slice(0, index),
+        updatedPoint,
+        ...this.#points.slice(index + 1),
+      ];
+
+      this._notify(updateType, updatedPoint);
+    }
+    catch(err) {
+      throw new Error('Can\'t update point');
+    }
   };
 
-  addPoint = (updateType, update) => {
-    this.#points = [
-      update,
-      ...this.#points,
-    ];
+  addPoint = async (updateType, update) => {
+    try {
+      const response = await this.#pointApiService.addPoint(update);
+      const newPoint = this.#supplementPoint(this.#adaptToClient(response));
+      this.#points = [
+        newPoint,
+        ...this.#points,
+      ];
 
-    this._notify(updateType, update);
+      this._notify(updateType, newPoint);
+    }
+    catch(err) {
+      throw new Error('Can\'t add point');
+    }
   };
 
-  deletePoint = (updateType, update) => {
+
+  deletePoint = async (updateType, update) => {
     const index = this.#points.findIndex((point) => point.id === update.id);
 
     if (index === -1) {
       throw new Error('Can\'t delete unexisting point');
     }
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      ...this.#points.slice(index + 1),
-    ];
-
-    this._notify(updateType);
+    try {
+      await this.#pointApiService.deletePoint(update);
+      this.#points = [
+        ...this.#points.slice(0, index),
+        ...this.#points.slice(index + 1),
+      ];
+      this._notify(updateType);
+    }
+    catch(err) {
+      throw new Error('Can\'t delete point');
+    }
   };
+
+  #adaptToClient = (point) => {
+    const adaptedPoint = {...point,
+      dateTo: point['date_to'],
+      basePrice: point['base_price'],
+      dateFrom: point['date_from'],
+      isFavorite: point['is_favorite'],
+    };
+
+    delete adaptedPoint['date_to'];
+    delete adaptedPoint['base_price'];
+    delete adaptedPoint['date_from'];
+    delete adaptedPoint['is_favorite'];
+
+    return adaptedPoint;
+  };
+
+  #supplementPoint(point) {
+    const {
+      destination: destinationId,
+      offers:offerIds,
+    } = point;
+    const destination = this.destinations.find(((el) => el.id === destinationId));
+    const offerByType = this.offers.find(({type}) => type === point.type);
+    const offers = offerByType.offers.filter(({id}) => offerIds.includes(id));
+
+    return {
+      ...point,
+      destination,
+      offers,
+    };
+  }
 }

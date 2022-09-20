@@ -1,12 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {
   EVENT_TYPE,
-  DESTINATION_NAME,
 } from '../fish/data.js';
-import {
-  destinations,
-  offer,
-} from '../fish/point.js';
 import {
   humanizeDate
 } from '../util.js';
@@ -16,9 +11,9 @@ import 'flatpickr/dist/themes/confetti.css';
 
 const BLANK_POINT = {
   basePrice: '',
-  dateFrom:'2021-07-10T11:50:56.845Z',
-  dateTo:'2021-07-11T14:20:13.375Z',
-  type:'taxi',
+  dateFrom:'',
+  dateTo:'',
+  type:'',
   destinationNameTemplate:''
 };
 
@@ -28,11 +23,9 @@ const createTypeTemplate = (currentType) => EVENT_TYPE.map((type) =>
    <label class="event__type-label  event__type-label--${ type }" for="event-type-${ type }">${ type }</label>
    </div>`).join('');
 
-const createDestinationNamesListTemplate = () => (
-  DESTINATION_NAME.map((name) =>
-    `<option value="${ name }"></option>`));
+const destinationNames = [];
 
-const creationFormElementTemplate = (points = {}) => {
+const creationFormElementTemplate = (points) => {
   const {
     basePrice,
     dateFrom,
@@ -43,30 +36,22 @@ const creationFormElementTemplate = (points = {}) => {
     destinationNameTemplate,
   } = points;
 
+  const filledDestinationNames = () => {
+    destinationNames.push(destination.name);
+  };
+
+  const createDestinationNamesListTemplate = () => (
+    destinationNames.map((name) =>
+      `<option value="${ name }"></option>`));
+
+  filledDestinationNames(destination);
+
   const typeTemplate = createTypeTemplate(type);
   const destinationNameListTemplate = createDestinationNamesListTemplate(destination);
+  const descriptionTemplate = destination.description;
+  const picturesTemplate = destination.pictures.map((el) => `<img class="event__photo" src= "${ el.src }" alt="${ el.description }">` ).join('');
 
-  const descriptionTemplate = destinations.map((el) => {
-    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
-      return null;
-    }
-
-    if (el.name === destinationNameTemplate){
-      return el.description;
-    }
-  }).join('');
-
-  const picturesTemplate = destinations.map((el) => {
-    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
-      return null;
-    }
-
-    if(el.name === destinationNameTemplate){
-      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ el.pictures[0].description }">`).join('');
-    }
-  }).join('');
-
-  const pointOfferType = offer.filter((el) => (el.type === type));
+  const pointOfferType = offers.filter((el) => (el.type === type));
 
   const PointOfferTemplate = pointOfferType.map((el) => {
     const checked = (offers === el.id ) ? 'checked' : '';
@@ -103,7 +88,7 @@ const creationFormElementTemplate = (points = {}) => {
       <label class="event__label  event__type-output" for="event-destination-1">
       ${ type }
       </label>
-      <input class="event__input  event__input--destination" id="event-destination-1" pattern="${ DESTINATION_NAME.join('|')} "type="text" name="event-destination" value='${destinationNameTemplate}' list="destination-list-1">
+      <input class="event__input  event__input--destination" id="event-destination-1" pattern="${ destinationNames.join('|')} "type="text" name="event-destination" value='${destinationNameTemplate}' list="destination-list-1">
       <datalist id="destination-list-1">
 
       ${ destinationNameListTemplate }

@@ -1,12 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {
   EVENT_TYPE,
-  DESTINATION_NAME,
 } from '../fish/data.js';
-import {
-  destinations,
-  offer,
-} from '../fish/point.js';
 import {
   humanizeDate,
 } from '../util.js';
@@ -20,45 +15,37 @@ const createTypeEditTemplate = (currentType) => EVENT_TYPE.map((type) =>
    <label class="event__type-label  event__type-label--${ type }" for="event-type-${ type }">${ type }</label>
    </div>`).join('');
 
+
+const destinationNames = [];
+
+const filledDestinationNames = (destination) => {
+  destinationNames.push(destination.name);
+};
+
 const editDestinationNamesListTemplate = () => (
-  DESTINATION_NAME.map((name) =>
+  destinationNames.map((name) =>
     `<option value="${ name }"></option>`));
 
 const EditionFormElementTemplate = (points) => {
   const {
+    // id,
     basePrice,
     dateFrom,
     dateTo,
     type,
     destination,
     offers,
-    destinationNameTemplate = destinations.find((el) => (el.id === destination)).name,
+    destinationNameTemplate = (destination.name),
+    descriptionTemplate = (destination.description),
+    picturesTemplate = destination.pictures.map((el) => `<img class="event__photo" src= "${ el.src }" alt="${ el.description }">` ).join('')
   } = points;
+
+  filledDestinationNames(destination);
 
   const typeEditTemplate = createTypeEditTemplate(type);
   const destinationNameListTemplate = editDestinationNamesListTemplate(destination);
-  const descriptionTemplate = destinations.map((el) => {
-    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
-      return null;
-    }
-    if (el.name === destinationNameTemplate){
-      return el.description;
-    }
-  }).join('');
 
-  const picturesTemplate = destinations.map((el) => {
-    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
-      return null;
-    }
-
-    if(el.name === destinationNameTemplate){
-      return el.pictures[0].src.map((picture) =>`<img class="event__photo" src= "${ picture }" alt="${ el.pictures[0].description }">`).join('');
-    }
-  }).join('');
-
-  const pointOfferType = offer.filter((el) => (el.type === type));
-
-  const PointOfferTemplate = pointOfferType.map((el) => {
+  const PointOfferTemplate = offers.map((el) => {
     const checked = (offers === el.id) ? 'checked' : '';
 
     return ` <div class="event__offer-selector">
@@ -94,7 +81,7 @@ const EditionFormElementTemplate = (points) => {
                     <label class="event__label  event__type-output" for="event-destination-1">
                     ${ type }
                     </label>
-                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" pattern="${DESTINATION_NAME.join('|' )} name="event-destination" value="${ destinationNameTemplate }" list="destination-list-1" >
+                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" pattern="${destinationNames.join('|')} name="event-destination" value="${ destinationNameTemplate }" list="destination-list-1" >
                     <datalist id="destination-list-1">
 
                     ${ destinationNameListTemplate}
@@ -156,8 +143,8 @@ export default class FormEditionView extends AbstractStatefulView {
 
   constructor(point) {
     super();
-    this._state = FormEditionView.parsePointToState(point);
 
+    this._state = FormEditionView.parsePointToState(point);
     this.#setInnerHandlers();
   }
 
@@ -214,6 +201,9 @@ export default class FormEditionView extends AbstractStatefulView {
     evt.preventDefault();
     this.updateElement({
       destinationNameTemplate: evt.target.value,
+      descriptionTemplate:'',
+      picturesTemplate:''
+
     });
   };
 

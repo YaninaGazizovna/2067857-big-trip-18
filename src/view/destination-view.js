@@ -5,10 +5,6 @@ import {
   formatHoursMinutes,
   differenceMinutes
 } from '../util.js';
-import {
-  destinations,
-  offer,
-} from '../fish/point.js';
 
 const destinationElementTemplate = (points) => {
   const {
@@ -18,16 +14,15 @@ const destinationElementTemplate = (points) => {
     basePrice,
     destination,
     isFavorite,
-    destinationNameTemplate = destinations.find((el) => (el.id === destination)).name,
+    offers,
+    destinationNameTemplate = (destination.name)
   } = points;
-
-  const pointOfferType = offer.filter((el) => (el.type === type));
 
   const favoriteClassName = isFavorite
     ? 'event__favorite-btn'
     : 'event__favorite-btn--active';
 
-  const selectedOffers = pointOfferType.map((el) => `<li class="event__offer">
+  const selectedOffers = offers.map((el) => `<li class="event__offer">
       <span class="event__offer-title">${el.title}</span>
       &plus;&euro;&nbsp;
       <span class="event__offer-price">${el.price}</span>
