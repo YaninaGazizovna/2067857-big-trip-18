@@ -1,4 +1,5 @@
 import { render, RenderPosition,remove } from '../framework/render.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import MainPageView from '../view/main-page-view.js';
 import MessageView from '../view/message-view.js';
 import LoadingView from '../view/loading-view.js';
@@ -9,6 +10,11 @@ import { sortByPointPrice, sortByPointDuration, sortByPointDate } from '../util.
 import { SortType, UserAction, UpdateType, FilterType } from '../fish/data.js';
 import { filter } from '../fish/filter.js';
 
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
+
 export default class MainPagePresenter {
 
   #mainPageComponents = new MainPageView();
@@ -17,12 +23,11 @@ export default class MainPagePresenter {
   #pointModel = null;
   #pageContainer = null;
   #filterModel = null;
-  #destinations = null;
-  #offers = null;
 
   #pointPresenter = new Map();
   #newPointPresenter = null;
   #isLoading = true;
+  #uiBlocker = new UiBlocker(TimeLimit.LOWER_LIMIT, TimeLimit.UPPER_LIMIT);
 
   #sortComponent = null;
   #currentSortType = SortType.DAY;
@@ -33,7 +38,7 @@ export default class MainPagePresenter {
     this.#pointModel = pointModel;
     this.#filterModel = filterModel;
 
-    this.#newPointPresenter = new NewPointPresenter(this.#mainPageComponents.element, this.#handleViewAction);
+    this.#newPointPresenter = new NewPointPresenter(this.#mainPageComponents.element, this.#handleViewAction,this.#pointModel);
 
     this.#pointModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -98,19 +103,24 @@ export default class MainPagePresenter {
   };
 
   #handleViewAction = (actionType, updateType, update) => {
+    this.#uiBlocker.block();
     switch (actionType){
       case UserAction.UPDATE_POINT:
+        this.#pointPresenter.get(update.id).setSaving();
         this.#pointModel.updatePoint(updateType, update);
         break;
 
       case UserAction.ADD_POINT:
+        this.#newPointPresenter.setSaving();
         this.#pointModel.addPoint(updateType, update);
         break;
 
       case UserAction.DELETE_POINT:
+        this.#pointPresenter.get(update.id).setDeleting();
         this.#pointModel.deletePoint(updateType, update);
         break;
     }
+    this.#uiBlocker.unblock();
   };
 
   #handleModeChange = () => {
@@ -133,7 +143,7 @@ export default class MainPagePresenter {
   };
 
   #renderPoint = (point,destinations) => {
-    const pointPresenter = new PointPresenter(this.#mainPageComponents.element, this.#handleViewAction, this.#handleModeChange);
+    const pointPresenter = new PointPresenter(this.#mainPageComponents.element, this.#handleViewAction, this.#handleModeChange,this.#pointModel);
     pointPresenter.init(point,destinations);
     this.#pointPresenter.set(point.id, pointPresenter);
   };

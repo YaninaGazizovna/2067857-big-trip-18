@@ -24,7 +24,7 @@ export default class NewPointPresenter {
       return;
     }
 
-    this.#formCreationComponent = new FormCreationView(destinations,offers);
+    this.#formCreationComponent = new FormCreationView(offers, destinations);
 
     this.#formCreationComponent.setFormSaveHandler(this.#handleFormSaving);
     this.#formCreationComponent.setDeleteClickHandler(this.#handleDeleteClick);
@@ -47,6 +47,24 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#onEscapeKeyDown);
   };
 
+  setSaving = () => {
+    this.#formCreationComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  };
+
+  setAborting = () => {
+    const resetFormState = () => {
+      this.#formCreationComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#formCreationComponent.shake(resetFormState);
+  };
 
   #handleFormSaving = (points) => {
     this.#changeData(
@@ -54,7 +72,6 @@ export default class NewPointPresenter {
       UpdateType.MINOR,
       points
     );
-    this.destroy();
   };
 
   #handleDeleteClick = () => {

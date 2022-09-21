@@ -28,7 +28,7 @@ export default class PointModel extends Observable {
       this.#offers = await this.#pointApiService.offers;
       this.#points = points.map(this.#adaptToClient);
 
-      this.#points = points.map(this.#adaptToClient).map((point) => this.#supplementPoint(point));
+      this.#points = points.map(this.#adaptToClient).map((point) => this.#additionPoint(point));
     }
 
     catch(err) {
@@ -52,7 +52,7 @@ export default class PointModel extends Observable {
 
     try {
       const response = await this.#pointApiService.updatePoint(update);
-      const updatedPoint = this.#supplementPoint(this.#adaptToClient(response));
+      const updatedPoint = this.#additionPoint(this.#adaptToClient(response));
 
       this.#points = [
         ...this.#points.slice(0, index),
@@ -70,9 +70,9 @@ export default class PointModel extends Observable {
   addPoint = async (updateType, update) => {
     try {
       const response = await this.#pointApiService.addPoint(update);
-      const newPoint = this.#supplementPoint(this.#adaptToClient(response));
+      const newPoint = this.#additionPoint(this.#adaptToClient(response));
       this.#points = [
-        newPoint,
+        ...newPoint,
         ...this.#points,
       ];
 
@@ -120,11 +120,12 @@ export default class PointModel extends Observable {
     return adaptedPoint;
   };
 
-  #supplementPoint(point) {
+  #additionPoint(point) {
     const {
       destination: destinationId,
       offers:offerIds,
     } = point;
+
     const destination = this.destinations.find(((el) => el.id === destinationId));
     const offerByType = this.offers.find(({type}) => type === point.type);
     const offers = offerByType.offers.filter(({id}) => offerIds.includes(id));

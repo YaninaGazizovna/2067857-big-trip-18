@@ -15,46 +15,67 @@ const createTypeEditTemplate = (currentType) => EVENT_TYPE.map((type) =>
    <label class="event__type-label  event__type-label--${ type }" for="event-type-${ type }">${ type }</label>
    </div>`).join('');
 
-
-const destinationNames = [];
-
-const filledDestinationNames = (destination) => {
-  destinationNames.push(destination.name);
-};
-
-const editDestinationNamesListTemplate = () => (
-  destinationNames.map((name) =>
-    `<option value="${ name }"></option>`));
-
-const EditionFormElementTemplate = (points) => {
+const EditionFormElementTemplate = (points,destinations, offers) => {
   const {
-    // id,
     basePrice,
     dateFrom,
     dateTo,
     type,
     destination,
-    offers,
     destinationNameTemplate = (destination.name),
-    descriptionTemplate = (destination.description),
-    picturesTemplate = destination.pictures.map((el) => `<img class="event__photo" src= "${ el.src }" alt="${ el.description }">` ).join('')
+    isDisabled,
+    isSaving,
+    isDeleting,
   } = points;
 
-  filledDestinationNames(destination);
+  const destinationNames = [];
+
+  const editDestinationNamesListTemplate = () => (
+    destinations.map((el) =>
+      `<option value="${ el.name }"></option>`));
+
+  destinations.forEach((el) => destinationNames.push(el.name));
 
   const typeEditTemplate = createTypeEditTemplate(type);
+
+  const descriptionTemplate = destinations.map((el) => {
+    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
+      return null;
+    }
+
+    if (el.name === destinationNameTemplate){
+      return el.description;
+    }
+  }).join('');
+
+  destinations.forEach((el) => destinationNames.push(el.name));
+
+  const isSubmitDisabled = isDisabled | !dateFrom | !dateTo | !type;
+
+  const picturesTemplate = destinations.map((el) => {
+    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
+      return null;
+    }
+
+    if(el.name === destinationNameTemplate){
+      return el.pictures.map((picture) => `<img class="event__photo" src= "${ picture.src }" alt="${ picture.description }">` ).join('');
+    }
+  }).join('');
+
   const destinationNameListTemplate = editDestinationNamesListTemplate(destination);
 
   const PointOfferTemplate = offers.map((el) => {
     const checked = (offers === el.id) ? 'checked' : '';
 
-    return ` <div class="event__offer-selector">
-              <input class="event__offer-checkbox visually-hidden" id="event-offer-${ el.title }" type="checkbox" ${ checked } name="event-offer-${ el.title }">
-              <label class="event__offer-label" for="event-offer-${ el.title }">
-              <span class="event__offer-title"> ${ el.title } </span>
+    if(el.type === type){
+      return el.offers.map((lll)=>` <div class="event__offer-selector">
+              <input class="event__offer-checkbox visually-hidden" id="event-offer-luggage-1" type="checkbox" ${ checked } name="event-offer-luggage">
+              <label class="event__offer-label" for="event-offer-luggage-1">
+              <span class="event__offer-title"> ${ lll.title } </span>
               &plus;&euro;&nbsp;
-              <span class="event__offer-price"> ${ el.price } </span>
-              </div>`;
+              <span class="event__offer-price"> ${ lll.price } </span>
+              </div>`).join('');
+    }
   }).join('');
 
   return `<li class="trip-events__item">
@@ -105,8 +126,8 @@ const EditionFormElementTemplate = (points) => {
                     <input class="event__input  event__input--price" id="event-price-1" type="number" pattern="[0-9]+" name="event-price" value="${ basePrice }">
                   </div>
 
-                  <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-                  <button class="event__reset-btn" type="reset">Delete</button>
+                  <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+                  <button class="event__reset-btn" type="reset">${isDeleting ? 'Deleting...' : 'Delete'}</button>
                   <button class="event__rollup-btn" type="button">
                     <span class="visually-hidden">Open event</span>
                   </button>
@@ -140,16 +161,19 @@ const EditionFormElementTemplate = (points) => {
 
 export default class FormEditionView extends AbstractStatefulView {
   #datepicker = null;
+  #destinations = null;
+  #offers = null;
 
-  constructor(point) {
+  constructor(point, offers, destinations) {
     super();
-
+    this.#destinations = destinations;
+    this.#offers = offers;
     this._state = FormEditionView.parsePointToState(point);
     this.#setInnerHandlers();
   }
 
   get template() {
-    return EditionFormElementTemplate(this._state);
+    return EditionFormElementTemplate(this._state, this.#destinations, this.#offers);
   }
 
   setFormSaveHandler = (callback) => {
@@ -242,13 +266,19 @@ export default class FormEditionView extends AbstractStatefulView {
   };
 
   static parsePointToState = (point) => ({
-    ...point
+    ...point,
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
   });
 
   static parseStateToPoint = (state) => {
     const point = {
       ...state
     };
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
 
     return point;
   };
