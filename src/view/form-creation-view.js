@@ -3,7 +3,8 @@ import {
   EVENT_TYPE,
 } from '../fish/data.js';
 import {
-  humanizeDate
+  humanizeDate,
+  isCurrentDate
 } from '../util.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/themes/confetti.css';
@@ -11,9 +12,9 @@ import 'flatpickr/dist/themes/confetti.css';
 
 const BLANK_POINT = {
   basePrice: '',
-  dateFrom:'',
-  dateTo:'',
-  type:'',
+  dateFrom:isCurrentDate(),
+  dateTo:isCurrentDate(),
+  type:'taxi',
   destinationNameTemplate:''
 };
 
@@ -23,46 +24,65 @@ const createTypeTemplate = (currentType) => EVENT_TYPE.map((type) =>
    <label class="event__type-label  event__type-label--${ type }" for="event-type-${ type }">${ type }</label>
    </div>`).join('');
 
-const destinationNames = [];
-
-const creationFormElementTemplate = (points) => {
+const creationFormElementTemplate = (points,destinations,offers) => {
   const {
     basePrice,
     dateFrom,
     dateTo,
     type,
     destination,
-    offers,
     destinationNameTemplate,
+    isDisabled,
+    isSaving,
+    isDeleting,
   } = points;
 
-  const filledDestinationNames = () => {
-    destinationNames.push(destination.name);
-  };
+  const destinationNames = [];
 
   const createDestinationNamesListTemplate = () => (
-    destinationNames.map((name) =>
-      `<option value="${ name }"></option>`));
-
-  filledDestinationNames(destination);
+    destinations.map((el) =>
+      `<option value="${ el.name }"></option>`));
 
   const typeTemplate = createTypeTemplate(type);
+
   const destinationNameListTemplate = createDestinationNamesListTemplate(destination);
-  const descriptionTemplate = destination.description;
-  const picturesTemplate = destination.pictures.map((el) => `<img class="event__photo" src= "${ el.src }" alt="${ el.description }">` ).join('');
 
-  const pointOfferType = offers.filter((el) => (el.type === type));
+  const descriptionTemplate = destinations.map((el) => {
+    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
+      return null;
+    }
 
-  const PointOfferTemplate = pointOfferType.map((el) => {
-    const checked = (offers === el.id ) ? 'checked' : '';
+    if (el.name === destinationNameTemplate){
+      return el.description;
+    }
+  }).join('');
 
-    return ` <div class="event__offer-selector">
+  destinations.forEach((el) => destinationNames.push(el.name));
+
+  const isSubmitDisabled = isDisabled | !dateFrom | !dateTo | !type;
+
+  const picturesTemplate = destinations.map((el) => {
+    if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
+      return null;
+    }
+
+    if(el.name === destinationNameTemplate){
+      return el.pictures.map((picture) => `<img class="event__photo" src= "${ picture.src }" alt="${ picture.description }">` ).join('');
+    }
+  }).join('');
+
+  const PointOfferTemplate = offers.map((el) => {
+    const checked = (offers === el.id) ? 'checked' : '';
+
+    if(el.type === type){
+      return el.offers.map((lll)=>` <div class="event__offer-selector">
               <input class="event__offer-checkbox visually-hidden" id="event-offer-luggage-1" type="checkbox" ${ checked } name="event-offer-luggage">
               <label class="event__offer-label" for="event-offer-luggage-1">
-              <span class="event__offer-title"> ${ el.title } </span>
+              <span class="event__offer-title"> ${ lll.title } </span>
               &plus;&euro;&nbsp;
-              <span class="event__offer-price"> ${ el.price } </span>
-              </div>`;
+              <span class="event__offer-price"> ${ lll.price } </span>
+              </div>`).join('');
+    }
   }).join('');
 
   return (
@@ -88,7 +108,7 @@ const creationFormElementTemplate = (points) => {
       <label class="event__label  event__type-output" for="event-destination-1">
       ${ type }
       </label>
-      <input class="event__input  event__input--destination" id="event-destination-1" pattern="${ destinationNames.join('|')} "type="text" name="event-destination" value='${destinationNameTemplate}' list="destination-list-1">
+      <input class="event__input  event__input--destination" id="event-destination-1" pattern="${ destinationNames.join('|') } "type="text" name="event-destination" value='${destinationNameTemplate}' list="destination-list-1">
       <datalist id="destination-list-1">
 
       ${ destinationNameListTemplate }
@@ -111,8 +131,8 @@ const creationFormElementTemplate = (points) => {
       </label>
       <input class="event__input  event__input--price" pattern="[0-9]+" id="event-price-1" type="number" name="event-price" value="">
     </div>
-    <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-    <button class="event__reset-btn" type="reset">Cancel</button>
+    <button class="event__save-btn  btn  btn--blue" type="submit"${isSubmitDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+    <button class="event__reset-btn" type="reset">${isDeleting ? 'Deleting...' : 'Delete'}</button>
   </header>
   <section class="event__details">
     <section class="event__section  event__section--offers">
@@ -141,16 +161,20 @@ const creationFormElementTemplate = (points) => {
 
 export default class FormCreationView extends AbstractStatefulView {
   #datepicker = null;
+  #destinations = null;
+  #offers = null;
 
-  constructor(point = BLANK_POINT) {
+  constructor(offers, destinations,point = BLANK_POINT) {
     super();
+    this.#destinations = destinations;
+    this.#offers = offers;
     this._state = FormCreationView.parsePointToState(point);
 
     this.#setInnerHandlers();
   }
 
   get template() {
-    return creationFormElementTemplate(this._state);
+    return creationFormElementTemplate(this._state, this.#destinations, this.#offers);
   }
 
   setFormSaveHandler = (callback) => {
@@ -229,13 +253,20 @@ export default class FormCreationView extends AbstractStatefulView {
   };
 
   static parsePointToState = (point) => ({
-    ...point
+    ...point,
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
   });
 
   static parseStateToPoint = (state) => {
     const points = {
       ...state
     };
+
+    delete points.isDisabled;
+    delete points.isSaving;
+    delete points.isDeleting;
 
     return points;
   };

@@ -11,7 +11,7 @@ const Mode = {
 
 export default class PointPresenter {
   #point = null;
-
+  #pointModel = null;
   #formEditionComponent = null;
   #destinationComponent = null;
   #mainPageComponents = null;
@@ -19,20 +19,23 @@ export default class PointPresenter {
   #changeMode = null;
   #mode = Mode.DEFAULT;
 
-  constructor (mainPageComponents, changeData, changeMode){
+  constructor (mainPageComponents, changeData, changeMode,pointModel){
     this.#mainPageComponents = mainPageComponents;
     this.#changeData = changeData;
     this.#changeMode = changeMode;
+    this.#pointModel = pointModel;
   }
 
   init = (point) => {
     this.#point = point;
+    const destinations = [...this.#pointModel.destinations];
+    const offers = [...this.#pointModel.offers];
 
     const prevDestinationComponent = this.#destinationComponent;
     const prevFormEditionComponent = this.#formEditionComponent;
 
     this.#destinationComponent = new DestinationView(point);
-    this.#formEditionComponent = new FormEditionView(point/*,this.#offers, this.#destinations*/);
+    this.#formEditionComponent = new FormEditionView(point,offers, destinations);
 
     this.#destinationComponent.setDestinationEditHandler(this.#handleEditClick);
     this.#formEditionComponent.setFormSaveHandler(this.#handleFormSaving);
@@ -50,7 +53,8 @@ export default class PointPresenter {
     }
 
     if(this.#mode === Mode.EDITING){
-      replace(this.#formEditionComponent, prevFormEditionComponent);
+      replace(this.#destinationComponent, prevFormEditionComponent);
+      this.#mode = Mode.DEFAULT;
     }
 
     remove(prevDestinationComponent);
@@ -69,6 +73,41 @@ export default class PointPresenter {
     }
   };
 
+  setSaving = () => {
+    if (this.#mode === Mode.EDITING) {
+      this.#formEditionComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  };
+
+  setDeleting = () => {
+    if (this.#mode === Mode.EDITING) {
+      this.#formEditionComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  };
+
+  setAborting = () => {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#destinationComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#formEditionComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#formEditionComponent.shake(resetFormState);
+  };
+
   #handleEditClick = () => {
     this.#replaceDestinationToEdition();
   };
@@ -82,7 +121,6 @@ export default class PointPresenter {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       update,
     );
-    this.#replaceEditionToDestination();
   };
 
   #handleDeleteClick = (point) => {

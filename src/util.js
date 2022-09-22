@@ -28,6 +28,7 @@ function getMixArray(array) {
 const humanizeDate = (dueDate) => dayjs(dueDate).format('DD/MM/YY H:MM');
 const humanizeHour = (dueDate) => dayjs(dueDate).format(' HH:MM');
 const humanizeStartDate = (dueDate) => dayjs(dueDate).format('MMM DD');
+const isCurrentDate = (dueDate) => dayjs(dueDate);
 const formatHoursMinutes = (minutes) =>
   dayjs.duration(minutes, 'minutes').format('DD[d] H[H] mm[M]');
 const differenceMinutes = (dateFrom, dateTo) =>
@@ -86,5 +87,6 @@ export {
   sortByPointDuration,
   sortByPointPrice,
   sortByPointDate,
-  isDatesEqual
+  isDatesEqual,
+  isCurrentDate
 };
