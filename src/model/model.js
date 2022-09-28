@@ -116,13 +116,13 @@ export default class PointModel extends Observable {
 
   #additionPoint(point) {
     const {
-      destination,
-      offers,
+      destination:destinationIdNumber,
+      offers:offerIdNumber,
     } = point;
 
-    // const destination = this.destinations.find(((el) => el.id === destinationId));
-    // const offerByType = this.offers.find(({type}) => type === point.type);
-    // const offers = offerByType.offers.filter(({id}) => offerIds.includes(id));
+    const destination = this.destinations.find(((el) => el.id === destinationIdNumber));
+    const offerByType = this.offers.find(({type}) => type === point.type);
+    const offers = offerByType.offers.filter(({id}) => offerIdNumber.includes(id));
 
     return {
       ...point,

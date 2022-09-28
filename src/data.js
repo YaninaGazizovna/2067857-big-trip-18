@@ -1,18 +1,6 @@
 const AUTHORIZATION = 'Basic jG3vfS21vsm2ba1k';
 const END_POINT = 'https://18.ecmascript.pages.academy/big-trip';
 
-const EVENT_TYPE = [
-  'taxi',
-  'bus',
-  'train',
-  'ship',
-  'drive',
-  'flight',
-  'check-in',
-  'sightseeing',
-  'restaurant',
-];
-
 const FilterType = {
   'EVERYTHING':'everything',
   'FUTURE':'future',
@@ -60,7 +48,6 @@ const Mode = {
 export {
   AUTHORIZATION,
   END_POINT,
-  EVENT_TYPE,
   FilterType,
   Method,
   SortType,
