@@ -1,21 +1,20 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {
   EVENT_TYPE,
-} from '../fish/data.js';
+} from '../data.js';
 import {
   humanizeDate,
-  isCurrentDate
 } from '../util.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/themes/confetti.css';
 
 
 const BLANK_POINT = {
-  basePrice: '',
-  dateFrom:isCurrentDate(),
-  dateTo:isCurrentDate(),
+  basePrice: 0,
+  destination: 0,
   type:'taxi',
-  destinationNameTemplate:''
+  destinationNameTemplate:'',
+  offers:[],
 };
 
 const createTypeTemplate = (currentType) => EVENT_TYPE.map((type) =>
@@ -30,13 +29,12 @@ const creationFormElementTemplate = (points,destinations,offers) => {
     dateFrom,
     dateTo,
     type,
-    destination,
     destinationNameTemplate,
     isDisabled,
     isSaving,
     isDeleting,
   } = points;
-
+  console.log(points)
   const destinationNames = [];
 
   const createDestinationNamesListTemplate = () => (
@@ -45,7 +43,7 @@ const creationFormElementTemplate = (points,destinations,offers) => {
 
   const typeTemplate = createTypeTemplate(type);
 
-  const destinationNameListTemplate = createDestinationNamesListTemplate(destination);
+  const destinationNameListTemplate = createDestinationNamesListTemplate();
 
   const descriptionTemplate = destinations.map((el) => {
     if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
@@ -59,7 +57,7 @@ const creationFormElementTemplate = (points,destinations,offers) => {
 
   destinations.forEach((el) => destinationNames.push(el.name));
 
-  const isSubmitDisabled = isDisabled | !dateFrom | !dateTo | !type;
+  const isSubmitDisabled = isDisabled | !dateFrom | !dateTo | !basePrice | !destinationNameTemplate;
 
   const picturesTemplate = destinations.map((el) => {
     if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
@@ -71,16 +69,16 @@ const creationFormElementTemplate = (points,destinations,offers) => {
     }
   }).join('');
 
-  const PointOfferTemplate = offers.map((el) => {
+  const pointOfferTemplate = offers.map((el) => {
     const checked = (offers === el.id) ? 'checked' : '';
 
     if(el.type === type){
-      return el.offers.map((lll)=>` <div class="event__offer-selector">
+      return el.offers.map((elem)=>` <div class="event__offer-selector">
               <input class="event__offer-checkbox visually-hidden" id="event-offer-luggage-1" type="checkbox" ${ checked } name="event-offer-luggage">
               <label class="event__offer-label" for="event-offer-luggage-1">
-              <span class="event__offer-title"> ${ lll.title } </span>
+              <span class="event__offer-title"> ${ elem.title } </span>
               &plus;&euro;&nbsp;
-              <span class="event__offer-price"> ${ lll.price } </span>
+              <span class="event__offer-price"> ${ elem.price } </span>
               </div>`).join('');
     }
   }).join('');
@@ -123,23 +121,24 @@ const creationFormElementTemplate = (points,destinations,offers) => {
       <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${ humanizeDate(dateTo) }">
     </div>
     <div class="event__field-group  event__field-group--price">
-      <label class="event__label" for="event-price-1">
+      <label class="event__label" for="event-
+      -1">
         <span class="visually-hidden">Price</span>
 
         ${ basePrice } &euro;
 
       </label>
-      <input class="event__input  event__input--price" pattern="[0-9]+" id="event-price-1" type="number" name="event-price" value="">
+      <input class="event__input  event__input--price" pattern="[1-9]+" id="event-price-1" type="number"  name="event-price" value="">
     </div>
-    <button class="event__save-btn  btn  btn--blue" type="submit"${isSubmitDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
-    <button class="event__reset-btn" type="reset">${isDeleting ? 'Deleting...' : 'Delete'}</button>
+    <button class="event__save-btn  btn  btn--blue" type="submit"${ isSubmitDisabled ? 'disabled' : ''}>${ isSaving ? 'Saving...' : 'Save'}</button>
+    <button class="event__reset-btn" type="reset">${ isDeleting ? 'Deleting...' : 'Delete' }</button>
   </header>
   <section class="event__details">
     <section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
 
-        ${PointOfferTemplate}
+        ${ pointOfferTemplate }
 
     </section>
     <section class="event__section  event__section--destination">
@@ -197,6 +196,14 @@ export default class FormCreationView extends AbstractStatefulView {
     this._callback.deleteClick(FormCreationView.parseStateToPoint(this._state));
   };
 
+  #setInnerHandlers = () => {
+    this.element.querySelectorAll('.event__type-input').forEach((i) =>
+      i.addEventListener('click', this.#typeToggleHandler));
+    this.#setDatepicker();
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationToggleHandler);
+  };
+
   _restoreHandlers = () => {
     this.#setInnerHandlers();
     this.setFormSaveHandler(this._callback.formSave);
@@ -204,10 +211,18 @@ export default class FormCreationView extends AbstractStatefulView {
     this.#setDatepicker();
   };
 
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      basePrice: Number(evt.target.value),
+    });
+  };
+
   #typeToggleHandler = (evt) => {
     evt.preventDefault();
     this.updateElement({
       type: evt.target.value,
+      offers: [],
     });
   };
 
@@ -216,14 +231,6 @@ export default class FormCreationView extends AbstractStatefulView {
     this.updateElement({
       destinationNameTemplate: evt.target.value,
     });
-  };
-
-  #setInnerHandlers = () => {
-    this.element.querySelectorAll('.event__type-input').forEach((i) =>
-      i.addEventListener('click', this.#typeToggleHandler));
-    this.#setDatepicker();
-
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationToggleHandler);
   };
 
   #datesChangeHandler = ([userDateFrom,userDateTo]) => {

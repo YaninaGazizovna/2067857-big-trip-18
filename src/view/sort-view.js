@@ -1,7 +1,7 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {
   SortType
-} from '../fish/data.js';
+} from '../data.js';
 
 const createSortElementTemplate = () => {
 

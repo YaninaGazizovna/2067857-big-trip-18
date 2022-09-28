@@ -1,5 +1,5 @@
 import Observable from '../framework/observable.js';
-import { UpdateType } from '../fish/data.js';
+import { UpdateType } from '../data.js';
 
 export default class PointModel extends Observable {
   #pointApiService = null;
@@ -8,6 +8,10 @@ export default class PointModel extends Observable {
   #destinations = [];
   #offers = [];
 
+  constructor(pointApiService) {
+    super();
+    this.#pointApiService = pointApiService;
+  }
 
   get points (){
     return this.#points;
@@ -29,19 +33,12 @@ export default class PointModel extends Observable {
       this.#points = points.map(this.#adaptToClient);
 
       this.#points = points.map(this.#adaptToClient).map((point) => this.#additionPoint(point));
-    }
-
-    catch(err) {
+    } catch(err) {
       this.#points = [];
     }
 
     this._notify(UpdateType.INIT);
   };
-
-  constructor(pointApiService) {
-    super();
-    this.#pointApiService = pointApiService;
-  }
 
   updatePoint = async(updateType, update) => {
     const index = this.points.findIndex((point) => point.id === update.id);
@@ -71,10 +68,8 @@ export default class PointModel extends Observable {
     try {
       const response = await this.#pointApiService.addPoint(update);
       const newPoint = this.#additionPoint(this.#adaptToClient(response));
-      this.#points = [
-        ...newPoint,
-        ...this.#points,
-      ];
+
+      this.#points = [newPoint, ...this.#points];
 
       this._notify(updateType, newPoint);
     }
@@ -82,7 +77,6 @@ export default class PointModel extends Observable {
       throw new Error('Can\'t add point');
     }
   };
-
 
   deletePoint = async (updateType, update) => {
     const index = this.#points.findIndex((point) => point.id === update.id);
@@ -122,13 +116,13 @@ export default class PointModel extends Observable {
 
   #additionPoint(point) {
     const {
-      destination: destinationId,
-      offers:offerIds,
+      destination,
+      offers,
     } = point;
 
-    const destination = this.destinations.find(((el) => el.id === destinationId));
-    const offerByType = this.offers.find(({type}) => type === point.type);
-    const offers = offerByType.offers.filter(({id}) => offerIds.includes(id));
+    // const destination = this.destinations.find(((el) => el.id === destinationId));
+    // const offerByType = this.offers.find(({type}) => type === point.type);
+    // const offers = offerByType.offers.filter(({id}) => offerIds.includes(id));
 
     return {
       ...point,

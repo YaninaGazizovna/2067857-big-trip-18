@@ -1,7 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {
   EVENT_TYPE,
-} from '../fish/data.js';
+} from '../data.js';
 import {
   humanizeDate,
 } from '../util.js';
@@ -50,7 +50,7 @@ const EditionFormElementTemplate = (points,destinations, offers) => {
 
   destinations.forEach((el) => destinationNames.push(el.name));
 
-  const isSubmitDisabled = isDisabled | !dateFrom | !dateTo | !type;
+  const isSubmitDisabled = isDisabled | !dateFrom | !dateTo | !basePrice | !destinationNameTemplate;
 
   const picturesTemplate = destinations.map((el) => {
     if (destinationNameTemplate === null || destinationNameTemplate !== el.name){
@@ -64,16 +64,14 @@ const EditionFormElementTemplate = (points,destinations, offers) => {
 
   const destinationNameListTemplate = editDestinationNamesListTemplate(destination);
 
-  const PointOfferTemplate = offers.map((el) => {
-    const checked = (offers === el.id) ? 'checked' : '';
-
+  const pointOfferTemplate = offers.map((el) => {
     if(el.type === type){
-      return el.offers.map((lll)=>` <div class="event__offer-selector">
-              <input class="event__offer-checkbox visually-hidden" id="event-offer-luggage-1" type="checkbox" ${ checked } name="event-offer-luggage">
+      return el.offers.map((elem) => `<div class="event__offer-selector">
+      <input class="event__offer-checkbox visually-hidden" id="event-offer-${ elem.title }" type="checkbox" ${ elem.id === points.id ? 'checked' : '' } name="event-offer-${ elem.title }">
               <label class="event__offer-label" for="event-offer-luggage-1">
-              <span class="event__offer-title"> ${ lll.title } </span>
+              <span class="event__offer-title"> ${ elem.title } </span>
               &plus;&euro;&nbsp;
-              <span class="event__offer-price"> ${ lll.price } </span>
+              <span class="event__offer-price"> ${ elem.price } </span>
               </div>`).join('');
     }
   }).join('');
@@ -126,8 +124,8 @@ const EditionFormElementTemplate = (points,destinations, offers) => {
                     <input class="event__input  event__input--price" id="event-price-1" type="number" pattern="[0-9]+" name="event-price" value="${ basePrice }">
                   </div>
 
-                  <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
-                  <button class="event__reset-btn" type="reset">${isDeleting ? 'Deleting...' : 'Delete'}</button>
+                  <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled ? 'disabled' : ''}>${ isSaving ? 'Saving...' : 'Save'}</button>
+                  <button class="event__reset-btn" type="reset">${ isDeleting ? 'Deleting...' : 'Delete' }</button>
                   <button class="event__rollup-btn" type="button">
                     <span class="visually-hidden">Open event</span>
                   </button>
@@ -137,7 +135,7 @@ const EditionFormElementTemplate = (points,destinations, offers) => {
                     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
                     <div class="event__available-offers">
-                    ${ PointOfferTemplate }
+                    ${ pointOfferTemplate }
 
                       </div>
                     </div>
@@ -169,6 +167,7 @@ export default class FormEditionView extends AbstractStatefulView {
     this.#destinations = destinations;
     this.#offers = offers;
     this._state = FormEditionView.parsePointToState(point);
+
     this.#setInnerHandlers();
   }
 
@@ -206,6 +205,15 @@ export default class FormEditionView extends AbstractStatefulView {
     this._callback.rollupEdit(FormEditionView.parsePointToState(this._state));
   };
 
+  #setInnerHandlers = () => {
+    this.element.querySelectorAll('.event__type-input').forEach((i) =>
+      i.addEventListener('click', this.#typeToggleHandler));
+    this.#setDatepicker();
+    this.element.querySelectorAll('.event__offer-label').forEach((element) => element.addEventListener('click', this.#offerClickHandler));
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationToggleHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
+  };
+
   _restoreHandlers = () => {
     this.#setInnerHandlers();
     this.setFormSaveHandler(this._callback.formSave);
@@ -225,18 +233,22 @@ export default class FormEditionView extends AbstractStatefulView {
     evt.preventDefault();
     this.updateElement({
       destinationNameTemplate: evt.target.value,
-      descriptionTemplate:'',
-      picturesTemplate:''
-
     });
   };
 
-  #setInnerHandlers = () => {
-    this.element.querySelectorAll('.event__type-input').forEach((i) =>
-      i.addEventListener('click', this.#typeToggleHandler));
-    this.#setDatepicker();
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      basePrice: Number(evt.target.value),
+    });
+  };
 
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationToggleHandler);
+  #offerClickHandler = (evt) => {
+    const fff = this.element.querySelectorAll('.event__offer-checkbox').forEach((element) => { element.checked = true;});
+    evt.preventDefault();
+    this.updateElement({
+      pointOfferTemplate:evt.target.checked = true,
+    });
   };
 
   #datesChangeHandler = ([userDateFrom,userDateTo]) => {

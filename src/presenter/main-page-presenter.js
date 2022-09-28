@@ -1,31 +1,40 @@
 import { render, RenderPosition,remove } from '../framework/render.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import MainPageView from '../view/main-page-view.js';
+import HeaderView from '../view/header-view.js';
+import NewPointButtonView from '../view/new-point-button.js';
 import MessageView from '../view/message-view.js';
 import LoadingView from '../view/loading-view.js';
+import PointModel from '../model/model.js';
+import FilterModel from '../model/filter-model.js';
 import PointPresenter from './point-presenter.js';
+import TripInfoPresenter from './trip-info-presenter.js';
+import FilterPresenter from './filter-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
 import SortView from '../view/sort-view.js';
-import { sortByPointPrice, sortByPointDuration, sortByPointDate } from '../util.js';
-import { SortType, UserAction, UpdateType, FilterType } from '../fish/data.js';
-import { filter } from '../fish/filter.js';
-
-const TimeLimit = {
-  LOWER_LIMIT: 350,
-  UPPER_LIMIT: 1000,
-};
+import { sortByPointPrice, sortByPointDuration, sortByPointDate,filter } from '../util.js';
+import { SortType, UserAction, UpdateType, FilterType, TimeLimit, AUTHORIZATION, END_POINT } from '../data.js';
+import PointApiService from '../point-api-service.js';
 
 export default class MainPagePresenter {
 
   #mainPageComponents = new MainPageView();
+  #headerComponent = new HeaderView();
   #loadingComponent = new LoadingView();
-  #messageComponent = null;
-  #pointModel = null;
-  #pageContainer = null;
-  #filterModel = null;
+  #newPointButton = new NewPointButtonView();
 
   #pointPresenter = new Map();
   #newPointPresenter = null;
+  #tripInfoPresenter = null;
+  #filterPresenter = null;
+
+  #pointModel = new PointModel(new PointApiService(END_POINT, AUTHORIZATION));
+  #filterModel = new FilterModel();
+
+  #pageContainer = null;
+  #mainContainer = null;
+  #messageComponent = null;
+
   #isLoading = true;
   #uiBlocker = new UiBlocker(TimeLimit.LOWER_LIMIT, TimeLimit.UPPER_LIMIT);
 
@@ -33,11 +42,11 @@ export default class MainPagePresenter {
   #currentSortType = SortType.DAY;
   #filterType = FilterType.EVERYTHING;
 
-  constructor (pageContainer, pointModel, filterModel){
+  constructor (mainContainer,pageContainer){
     this.#pageContainer = pageContainer;
-    this.#pointModel = pointModel;
-    this.#filterModel = filterModel;
+    this.#mainContainer = mainContainer;
 
+    this.#filterPresenter = new FilterPresenter(this.#headerComponent.element, this.#filterModel, this.#pointModel);
     this.#newPointPresenter = new NewPointPresenter(this.#mainPageComponents.element, this.#handleViewAction,this.#pointModel);
 
     this.#pointModel.addObserver(this.#handleModelEvent);
@@ -63,13 +72,14 @@ export default class MainPagePresenter {
     return filteredPoints;
   }
 
-  get destinations (){
-    const destinations = this.#pointModel.destinations;
-    return destinations;
-  }
-
   init = () => {
     this.#renderPage();
+    this.#filterPresenter.init();
+    this.#pointModel.init()
+      .finally(() => {
+        render(this.#newPointButton,this.#headerComponent.element);
+        this.#newPointButton.setClickHandler(this.#handleNewPointButtonClick);
+      });
   };
 
   createPoint = (callback) => {
@@ -102,22 +112,35 @@ export default class MainPagePresenter {
     }
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async(actionType, updateType, update) => {
     this.#uiBlocker.block();
+
     switch (actionType){
       case UserAction.UPDATE_POINT:
         this.#pointPresenter.get(update.id).setSaving();
-        this.#pointModel.updatePoint(updateType, update);
+        try {
+          await this.#pointModel.updatePoint(updateType, update);
+        } catch(err) {
+          this.#pointPresenter.get(update.id).setAborting();
+        }
         break;
 
       case UserAction.ADD_POINT:
         this.#newPointPresenter.setSaving();
-        this.#pointModel.addPoint(updateType, update);
+        try {
+          await this.#pointModel.addPoint(updateType, update);
+        } catch(err) {
+          this.#newPointPresenter.setAborting();
+        }
         break;
 
       case UserAction.DELETE_POINT:
         this.#pointPresenter.get(update.id).setDeleting();
-        this.#pointModel.deletePoint(updateType, update);
+        try {
+          await this.#pointModel.deletePoint(updateType, update);
+        } catch(err) {
+          this.#pointPresenter.get(update.id).setAborting();
+        }
         break;
     }
     this.#uiBlocker.unblock();
@@ -138,8 +161,23 @@ export default class MainPagePresenter {
     this.#renderPage();
   };
 
+  #handleNewPointFormClose = () => {
+    this.#newPointButton.element.disabled = false;
+  };
+
+  #handleNewPointButtonClick = () => {
+    this.createPoint(this.#handleNewPointFormClose);
+    this.#newPointButton.element.disabled = true;
+  };
+
   #renderLoading = () => {
     render(this.#loadingComponent, this.#mainPageComponents.element, RenderPosition.AFTERBEGIN);
+  };
+
+  #renderInfo = (destinations, offers)=>{
+    const points = this.#pointModel.points;
+    this.#tripInfoPresenter = new TripInfoPresenter(this.#headerComponent.element,this.#pointModel);
+    this.#tripInfoPresenter.init(points,destinations,offers);
   };
 
   #renderPoint = (point,destinations) => {
@@ -160,6 +198,7 @@ export default class MainPagePresenter {
   };
 
   #renderPage = () => {
+    render(this.#headerComponent, this.#mainContainer);
     render(this.#mainPageComponents, this.#pageContainer);
 
     if (this.#isLoading) {
@@ -178,11 +217,13 @@ export default class MainPagePresenter {
     }
 
     this.#renderPoints(points.slice(0, Math.min(pointsCount)));
+    this.#renderInfo(points.slice(0, 0));
 
   };
 
   #clearPage = ({resetSortType = false} = {}) => {
     this.#newPointPresenter.destroy();
+    this.#tripInfoPresenter.destroy();
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
     remove(this.#loadingComponent);

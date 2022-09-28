@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { FilterType } from '../fish/data.js';
+import { FilterType } from '../data.js';
 
 const noPointTextType = {
   [FilterType.EVERYTHING]:'Click New Event to create your first point',

@@ -1,13 +1,8 @@
 import { render, replace, remove } from '../framework/render.js';
 import FormEditionView from '../view/form-edition-view.js';
 import DestinationView from '../view/destination-view.js';
-import {UserAction, UpdateType} from '../fish/data.js';
+import {UserAction, UpdateType, Mode} from '../data.js';
 import { isDatesEqual } from '../util.js';
-
-const Mode = {
-  DEFAULT: 'DEFAULT',
-  EDITING: 'EDITING',
-};
 
 export default class PointPresenter {
   #point = null;
@@ -137,7 +132,11 @@ export default class PointPresenter {
   };
 
   #handleFavoriteClick = () => {
-    this.#changeData({...this.#point, isFavorite: !this.#point.isFavorite});
+    this.#changeData(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      {...this.#point, isFavorite: !this.#point.isFavorite}
+    );
   };
 
   #onEscapeKeyDown = (evt) =>{
