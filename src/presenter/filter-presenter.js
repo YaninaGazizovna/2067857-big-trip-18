@@ -1,6 +1,6 @@
 import { render, replace,remove } from '../framework/render.js';
 import FilterView from '../view/filter-view.js';
-import { FilterType, UpdateType } from '../fish/data.js';
+import { FilterType, UpdateType } from '../data.js';
 
 export default class MainPagePresenter {
   #filterContainer = null;

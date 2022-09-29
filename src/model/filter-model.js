@@ -1,5 +1,5 @@
 import Observable from '../framework/observable.js';
-import { FilterType } from '../fish/data.js';
+import { FilterType } from '../data.js';
 
 export default class FilterModel extends Observable {
   #filter = FilterType.EVERYTHING;

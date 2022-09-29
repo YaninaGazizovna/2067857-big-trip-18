@@ -6,6 +6,16 @@ import {
   differenceMinutes
 } from '../util.js';
 
+const selectedOffers = ({title, price}) => (`
+<li class="event__offer">
+  <span class="event__offer-title">${title}</span>
+  &plus;&euro;&nbsp;
+  <span class="event__offer-price">${price}</span>
+</li>
+`);
+
+const createOffersTemplate = (offers) => offers?.length ? offers.map(selectedOffers).join('') : '';
+
 const destinationElementTemplate = (points) => {
   const {
     dateFrom,
@@ -15,18 +25,11 @@ const destinationElementTemplate = (points) => {
     destination,
     isFavorite,
     offers,
-    destinationNameTemplate = (destination.name)
   } = points;
 
   const favoriteClassName = isFavorite
     ? 'event__favorite-btn'
     : 'event__favorite-btn--active';
-
-  const selectedOffers = offers.map((el) => `<li class="event__offer">
-      <span class="event__offer-title">${el.title}</span>
-      &plus;&euro;&nbsp;
-      <span class="event__offer-price">${el.price}</span>
-    </li>`).join('');
 
   const createDifferenceTimeFormat = () => {
     const differenceResult = differenceMinutes(dateFrom, dateTo);
@@ -42,7 +45,7 @@ const destinationElementTemplate = (points) => {
                 <div class="event__type">
                   <img class="event__type-icon" width="42" height="42" src="img/icons/${ type }.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${ type } ${ destinationNameTemplate }</h3>
+                <h3 class="event__title">${ type } ${destination ? destination.name : ''}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
                     <time class="event__start-time" datetime ="${ dateFrom }">${ humanizeHour(dateFrom) }</time>
@@ -57,7 +60,7 @@ const destinationElementTemplate = (points) => {
                 <h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
 
-                    ${ selectedOffers }
+                    ${ createOffersTemplate(offers) }
 
                 </ul>
                 <button class="event__favorite-btn  ${ favoriteClassName }" type="button">

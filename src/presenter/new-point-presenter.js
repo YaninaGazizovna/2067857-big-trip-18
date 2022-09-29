@@ -1,6 +1,6 @@
 import { render, RenderPosition,remove } from '../framework/render.js';
 import FormCreationView from '../view/form-creation-view.js';
-import { UserAction, UpdateType, } from '../fish/data.js';
+import { UserAction, UpdateType, } from '../data.js';
 
 export default class NewPointPresenter {
   #mainPageComponents = null;
@@ -84,5 +84,4 @@ export default class NewPointPresenter {
       this.destroy();
     }
   };
-
 }
