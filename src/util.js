@@ -5,6 +5,7 @@ import { FilterType } from './data.js';
 dayjs.extend(duration);
 
 const humanizeDate = (dueDate) => dayjs(dueDate).format('DD/MM/YY H:MM');
+const humanizeDates = (dueDate) => dayjs(dueDate).format('DD MMM');
 const humanizeHour = (dueDate) => dayjs(dueDate).format(' HH:MM');
 const humanizeStartDate = (dueDate) => dayjs(dueDate).format('MMM DD');
 const formatHoursMinutes = (minutes) =>
@@ -69,5 +70,6 @@ export {
   sortByPointPrice,
   sortByPointDate,
   isDatesEqual,
-  filter
+  filter,
+  humanizeDates
 };

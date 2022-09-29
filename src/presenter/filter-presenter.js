@@ -2,7 +2,7 @@ import { render, replace,remove } from '../framework/render.js';
 import FilterView from '../view/filter-view.js';
 import { FilterType, UpdateType } from '../data.js';
 
-export default class MainPagePresenter {
+export default class FilterPresenter {
   #filterContainer = null;
   #filterModel = null;
   #pointModel = null;
@@ -61,5 +61,4 @@ export default class MainPagePresenter {
     }
     this.#filterModel.setFilter(UpdateType.MAJOR, filterType);
   };
-
 }

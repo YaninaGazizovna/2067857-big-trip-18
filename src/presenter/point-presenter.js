@@ -1,7 +1,7 @@
 import { render, replace, remove } from '../framework/render.js';
 import FormEditionView from '../view/form-edition-view.js';
 import DestinationView from '../view/destination-view.js';
-import {UserAction, UpdateType, Mode} from '../data.js';
+import { UserAction, UpdateType, Mode,isEscapeKey } from '../data.js';
 import { isDatesEqual } from '../util.js';
 
 export default class PointPresenter {
@@ -140,7 +140,7 @@ export default class PointPresenter {
   };
 
   #onEscapeKeyDown = (evt) =>{
-    if(evt.key === 'Escape' || evt.key === 'Esc') {
+    if(isEscapeKey(evt)) {
       evt.preventDefault();
       this.#formEditionComponent.reset(this.#point);
       this.#replaceEditionToDestination();

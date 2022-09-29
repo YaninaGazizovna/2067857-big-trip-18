@@ -1,6 +1,6 @@
 import { render, RenderPosition,remove } from '../framework/render.js';
 import FormCreationView from '../view/form-creation-view.js';
-import { UserAction, UpdateType, } from '../data.js';
+import { UserAction, UpdateType,isEscapeKey } from '../data.js';
 
 export default class NewPointPresenter {
   #mainPageComponents = null;
@@ -79,7 +79,7 @@ export default class NewPointPresenter {
   };
 
   #onEscapeKeyDown = (evt) =>{
-    if(evt.key === 'Escape' || evt.key === 'Esc') {
+    if(isEscapeKey(evt)) {
       evt.preventDefault();
       this.destroy();
     }

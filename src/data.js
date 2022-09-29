@@ -1,6 +1,8 @@
 const AUTHORIZATION = 'Basic jG3vfS21vsm2ba1k';
 const END_POINT = 'https://18.ecmascript.pages.academy/big-trip';
 
+const MAXIMUM_CITIES_COUNT = 4;
+
 const FilterType = {
   'EVERYTHING':'everything',
   'FUTURE':'future',
@@ -45,7 +47,10 @@ const Mode = {
   EDITING: 'EDITING',
 };
 
+const isEscapeKey = (evt) => evt.key === 'Escape' | evt.key === 'Esc';
+
 export {
+  MAXIMUM_CITIES_COUNT,
   AUTHORIZATION,
   END_POINT,
   FilterType,
@@ -54,5 +59,6 @@ export {
   UpdateType,
   UserAction,
   TimeLimit,
-  Mode
+  Mode,
+  isEscapeKey
 };

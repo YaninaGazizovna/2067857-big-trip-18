@@ -1,12 +1,12 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
-import { sortByPointDate, humanizeDate } from '../util.js';
+import { sortByPointDate, humanizeDates } from '../util.js';
+import { MAXIMUM_CITIES_COUNT } from '../data.js';
 
-
-const createTripInfoTemplate = (points, destinations, offers) => {
+const createTripInfoTemplate = (points, offers) => {
 
   const getTitle = () => {
-    const cities = destinations
-      .map((el) => el.name)
+    const cities = points
+      .map(({destination}) => destination?.name)
       .reduce((items, city) => {
         if (items[items.length - 1] !== city) {
           items.push(city);
@@ -14,10 +14,9 @@ const createTripInfoTemplate = (points, destinations, offers) => {
         return items;
       }, []);
 
-    if (cities.length < 4) {
+    if (cities.length < MAXIMUM_CITIES_COUNT) {
       return cities.join(' - ');
     }
-
     return `${cities[0]} - ... - ${cities[cities.length - 1]}`;
   };
 
@@ -27,7 +26,7 @@ const createTripInfoTemplate = (points, destinations, offers) => {
     const startDates = points.map((point) => point.dateFrom);
     const startDate = startDates.sort(sortByPointDate)[startDates.length - 1];
 
-    return `${humanizeDate(startDate)} - ${humanizeDate(endDate)}`;
+    return `${humanizeDates(startDate)} - ${humanizeDates(endDate)}`;
   };
 
   const totalPriceCreation = () => {

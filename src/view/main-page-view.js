@@ -4,6 +4,6 @@ const mainPageTemplate = () => '<ul class="trip-events__list"></ul>';
 
 export default class MainPageView extends AbstractView{
   get template() {
-    return mainPageTemplate;
+    return mainPageTemplate();
   }
 }
